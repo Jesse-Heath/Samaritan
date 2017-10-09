@@ -14,7 +14,7 @@ client.on("message", (message) => {
             message.channel.send("Yes?..");
         }
     } catch (error) {
-
+        console.log(error);
     }
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
@@ -121,7 +121,7 @@ client.on("message", (message) => {
                     content += `\n\t\t${config.commandPrefix}**help** - This list.`;
                     content += `\n\t\t${config.commandPrefix}**everyone** - Calls everyone.`;
                     content += `\n\t\t${config.commandPrefix}**meta** - Gets pictures of the current meta report.`;
-                    content += `\n\t\t${config.commandPrefix}**swgoh** - Gets your swgoh.gg link.`;
+                    content += `\n\t\t${config.commandPrefix}**link** - Gets your swgoh.gg link.`;
                     content += `\n\t\t${config.commandPrefix}**mods** *user* *character* - Gets a picture of your current mods on a character.`;
                     content += `\n\t\t${config.commandPrefix}**info** *user* *character* - Gives you important info on a character.`;
                     content += `\n\t\t${config.commandPrefix}**gear** *user* *character* - Gets a picture of the gear level on a character.`;
@@ -154,7 +154,7 @@ client.on("message", (message) => {
                 });
                 // message.channel.send(`${config.emoji.construction} Currently in development ${config.emoji.worker}`);
                 break;
-            case "swgoh":
+            case "link":
                 message.channel.send(`https://swgoh.gg/u/${args[0]}/`);
                 break;
             case "mods":
