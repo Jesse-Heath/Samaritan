@@ -1,6 +1,6 @@
-var char = "grand-admiral-thrawn";
+var char = "wedge-antilles";
 var user = "jessinator";
-    console.log("getting info for " + char + " on profile " + user);
+    console.log("getting gear level for " + user + ", character: " + char);
     var url = 'https://swgoh.gg/u/' + user + '/collection/' + char + '/';
     console.log("start");
 
@@ -10,19 +10,16 @@ var user = "jessinator";
     request(url, function (error, response, body) {
       if (!error) {
         var $ = cheerio.load(body);
-        var skills = $(".pc-skill");
-        var data = {};
+        var data = [];
         var decode = require('decode-html');
-        for (var i = 0; i < skills.length; i++) {
-            var level = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-levels").attr("data-title");
-            var name = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-name").html();
-            var ability = {
-                "name": decode(name),
-                "level": level
-            };
-            data[i] = ability;
+        for (var i = 0; i < 6; i++) {
+            var gear = $(".content-container-aside > .list-group.media-list.media-list-stream.m-b-sm > .media.list-group-item > .pc-gear > .pc-gear-list > .pc-slot.pc-slot" + (i + 1)).attr("class");
+            var name = $(".content-container-aside > .list-group.media-list.media-list-stream.m-b-sm > .media.list-group-item > .pc-gear > .pc-gear-list > .pc-slot.pc-slot" + (i + 1) + " > .pc-slot-preview > .gear-icon").attr("title");
+            if (gear.includes("needed")) {
+                data.push(decode(name));
+            }
         }
-        console.log(data);
+        callback(data);
       } else {
         console.log("We’ve encountered an error: " + error);
       }

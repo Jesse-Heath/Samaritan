@@ -126,7 +126,7 @@ client.on("message", (message) => {
                     content += `\n\t\t${config.commandPrefix}**info** *user* *character* - Gives you important info on a character.`;
                     content += `\n\t\t${config.commandPrefix}**gear** *user* *character* - Gets a picture of the gear level on a character.`;
                     content += `\n\t\t${config.commandPrefix}**gear-needed** *user* *character* - Gets a picture of the gear needed to get to the next level on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**skills** *user* *character* - Gets a picture of the ability levels on a character.`;
+                    content += `\n\t\t${config.commandPrefix}**skills** *user* *character* - Gets you the ability levels on a character.`;
                     content += `\n\t\t${config.commandPrefix}**faction** *user* *faction* - Gets a picture of all characters for a faction.`;
                     content += `\n\t\t${config.commandPrefix}**arena** *user* - Gets a picture of your arena team.`;
                     content += `\n\t\t${config.commandPrefix}**ship-skills** *user* *ship* - Gets a picture of the ability levels on a ship.`;
@@ -251,8 +251,8 @@ client.on("message", (message) => {
             case "gear":
                 console.log("gear command triggered");
                 message.channel.send("I'll get right on that <@" + message.author.id + ">");
-                getGearLevel(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
+                getGearLevel(args[0], args[1], function (uuid, data) {
+                    message.channel.send(
                         `Here's ${args[0]} gear level for ${args[1]}`,
                         {
                             files: [
@@ -260,6 +260,32 @@ client.on("message", (message) => {
                             ]
                         }
                     );
+                    var fields = [];
+                    for (var i = 0; i < data.length; i++) {
+                        var field = {
+                            name: "Needed:",
+                            value: data[i],
+                            inline: true
+                        };
+                        fields.push(field);
+                    };
+                    setTimeout( function() {
+                        message.channel.send({embed: {
+                            author: {
+                              name: client.user.username,
+                              icon_url: client.user.avatarURL
+                            },
+                            title: "Your also need these gear",
+                            url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                            fields: fields,
+                            timestamp: new Date(),
+                            footer: {
+                              icon_url: client.user.avatarURL,
+                              text: ""
+                            }
+                          }
+                      });
+                  }, 2000);
                 });
                 break;
             case "gear-needed":
@@ -440,7 +466,30 @@ function getGearLevel(user, char, callback) {
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
     program.on("exit", code => {
-        callback(uuid);
+        console.log("getting gear level for " + user + ", character: " + char);
+        var url = 'https://swgoh.gg/u/' + user + '/collection/' + char + '/';
+        console.log("start");
+
+        var request = require('request');
+        var cheerio = require('cheerio');
+
+        request(url, function (error, response, body) {
+          if (!error) {
+            var $ = cheerio.load(body);
+            var data = [];
+            var decode = require('decode-html');
+            for (var i = 0; i < 6; i++) {
+                var gear = $(".content-container-aside > .list-group.media-list.media-list-stream.m-b-sm > .media.list-group-item > .pc-gear > .pc-gear-list > .pc-slot.pc-slot" + (i + 1)).attr("class");
+                var name = $(".content-container-aside > .list-group.media-list.media-list-stream.m-b-sm > .media.list-group-item > .pc-gear > .pc-gear-list > .pc-slot.pc-slot" + (i + 1) + " > .pc-slot-preview > .gear-icon").attr("title");
+                if (gear.includes("needed")) {
+                    data.push(decode(name));
+                }
+            }
+            callback(uuid, data);
+          } else {
+            console.log("We’ve encountered an error: " + error);
+          }
+        });
     });
 }
 function getGearNeeded(user, char, callback) {
