@@ -471,7 +471,7 @@ function getArena(user, callback) {
                     var char = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.current-rank > div.current-rank-team > div > div.team-listing-member:nth-child(" + (i + 1) + ") > div > a").attr("href");
                     var name = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.current-rank > div.current-rank-team > div > div.team-listing-member:nth-child(" + (i + 1) + ") > div").attr("title");
                     var member = {
-                        "name": name,
+                        "name": decode(name),
                         "url": char
                     };
                     data.push(member);
