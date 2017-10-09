@@ -436,7 +436,7 @@ function getGearLevel(user, char, callback) {
     const uuid = guid();
     console.log("uuid: " + uuid);
     var phantomjs = require("phantomjs-prebuilt");
-    var program = phantomjs.exec("./getGearLevel.js", uuid, user, char);
+    var program = phantomjs.exec("./Phantom/getGearLevel.js", uuid, user, char);
     program.stdout.pipe(process.stdout);
     program.stderr.pipe(process.stderr);
     program.on("exit", code => {
