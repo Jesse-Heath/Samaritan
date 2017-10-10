@@ -120,6 +120,7 @@ client.on("message", (message) => {
                 var content = `Hello <@${message.author.id}>. Here's my available commands so far:\n`;
                     content += `\n\t\t${config.commandPrefix}**help** - This list.`;
                     content += `\n\t\t${config.commandPrefix}**everyone** - Calls everyone.`;
+                    content += `\n\t\t${config.commandPrefix}**remind** *(how many times)* *(how many minutes to wait inbetween)* *channel* *message* - Takes the message you typed and sends it back to the channel later. If you mention a channel it sends the message there instead`;
                     content += `\n\t\t${config.commandPrefix}**meta** - Gets pictures of the current meta report.`;
                     content += `\n\t\t${config.commandPrefix}**link** - Gets your swgoh.gg link.`;
                     content += `\n\t\t${config.commandPrefix}**mods** *user* *character* - Gets a picture of your current mods on a character.`;
