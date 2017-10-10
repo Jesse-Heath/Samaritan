@@ -10,7 +10,7 @@ client.on("message", (message) => {
     if (message.author.bot) return;
     var config = require("./Config/config.json");
     try {
-        if (message.mentions.users.first().username == "SW GOH Bot") {
+        if (message.mentions.users.first() != undefined && message.mentions.users.first().username == "SW GOH Bot") {
             message.channel.send("Yes?..");
         }
     } catch (error) {
@@ -35,9 +35,13 @@ client.on("message", (message) => {
                 var timeToWait = parseInt(args.shift()) * 1000 * 60;
                 remindMe(howManyTimesToRun, timeToWait,
                     function() {
-                        args = args.filter(checkForMention);
-                        var id = message.content.substring(message.content.indexOf("<#") + 2, message.content.indexOf("<#") + 2 + message.content.substring(message.content.indexOf("<#" )+ 2).indexOf(">"));
-                        client.channels.get(id).send(args.join(" "));
+                        if (message.mentions.channels.first() == undefined) {
+                            message.channel.send(args.join(" "));
+                        } else {
+                            args.shift();
+                            var id = message.mentions.channels.first().id;
+                            client.channels.get(id).send(args.join(" "));
+                        }
                     }
                 );
                 break;
@@ -431,12 +435,6 @@ client.on("message", (message) => {
 
 client.login(auth.token);
 
-function checkForMention(arg) {
-    if (arg.startsWith("<#") && arg.endsWith(">")) {
-        return false;
-    }
-    return true;
-}
 function remindMe(howManyTimesToRun, timeToWait, callback) {
     for (var i = 0; i < howManyTimesToRun; i++) {
         setTimeout(
