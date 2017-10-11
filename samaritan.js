@@ -26,24 +26,37 @@ client.on("message", (message) => {
         switch(command) {
             case "everyone":
                 console.log("everyone command triggered");
-                message.channel.send("<@!everyone>");
+                message.channel.send("Hi @ everyone")
+                    .then(sentMessage => {
+                        setTimeout(function() {
+                            sentMessage.delete();
+                        },
+                        2000);
+                    });
                 break;
             case "remind":
                 console.log("remind command triggered");
-                message.channel.send("Setting reminders...");
-                var howManyTimesToRun = args.shift();
-                var timeToWait = parseInt(args.shift()) * 1000 * 60;
-                remindMe(howManyTimesToRun, timeToWait,
-                    function() {
-                        if (message.mentions.channels.first() == undefined) {
-                            message.channel.send(args.join(" "));
-                        } else {
-                            args.shift();
-                            var id = message.mentions.channels.first().id;
-                            client.channels.get(id).send(args.join(" "));
+                message.channel.send("Setting reminders...")
+                .then(sentMessage => {
+                    setTimeout(function() {
+                        sentMessage.delete();
+                        message.delete();
+                    },
+                    2000);
+                    var howManyTimesToRun = args.shift();
+                    var timeToWait = parseInt(args.shift()) * 1000 * 60;
+                    remindMe(howManyTimesToRun, timeToWait,
+                        function() {
+                            if (message.mentions.channels.first() == undefined) {
+                                message.channel.send(args.join(" "));
+                            } else {
+                                args.shift();
+                                var id = message.mentions.channels.first().id;
+                                client.channels.get(id).send(args.join(" "));
+                            }
                         }
-                    }
-                );
+                    );
+                });
                 break;
             case "test":
                 console.log("test command triggered");
