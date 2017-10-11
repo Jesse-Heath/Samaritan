@@ -387,6 +387,7 @@ client.on("message", (message) => {
                         fields.push(field);
                     };
                     setTimeout( function() {
+                        var rankState = data.currentRank > data.averageRank;
                         message.channel.send({
                             embed: {
                                 author: {
@@ -394,6 +395,7 @@ client.on("message", (message) => {
                                   icon_url: client.user.avatarURL
                                 },
                                 title: "Some basic details on your team",
+                                description: (rankState ? "Good work, your arena rank is improving" : "Unfortunatley your arena rank is dropping") + `. Your current rank is ${data.currentRank} which is ` + (rankState ? "better" : "worse") + ` than your average rank of ${data.averageRank}.\nHighest recorded rank is ${data.highestRank}\nLowest recorded rank is ${data.lowestRank}`,
                                 url: "https://swgoh.gg/u/" + args[0],
                                 fields: fields,
                                 timestamp: new Date(),
@@ -488,6 +490,10 @@ function getArena(user, callback) {
                     };
                     data.push(member);
                 }
+                data["currentRank"] = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.current-rank > div.current-rank-info > div.current-rank-value").html();
+                data["highestRank"] = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.stat-listing.stats-arena > div:nth-child(1) > div.stat-item-info > div.stat-item-value").html();
+                data["lowestRank"] = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.stat-listing.stats-arena > div:nth-child(2) > div.stat-item-info > div.stat-item-value").html();
+                data["averageRank"] = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li:nth-child(5) > div > div.stat-listing.stats-arena > div:nth-child(3) > div.stat-item-info > div.stat-item-value").html();
                 getStats(data[0].url, function (data1) {
                     getStats(data[1].url, function (data2) {
                         getStats(data[2].url, function (data3) {
