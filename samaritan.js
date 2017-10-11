@@ -10,7 +10,7 @@ client.on("message", (message) => {
     if (message.author.bot) return;
     var config = require("./Config/config.json");
     try {
-        if (message.mentions.users.first() != undefined && message.mentions.users.first().username == "SW GOH Bot") {
+        if (message.mentions.users.first() != undefined && message.mentions.users.first().username == client.user.username) {
             message.channel.send("Yes?..");
         }
     } catch (error) {
@@ -204,7 +204,7 @@ client.on("message", (message) => {
                             fields: [
                                 {
                                     name: "Info",
-                                    value: `Lvl ${data.level} ${data.stars}* ${data.gear}.`,
+                                    value: `Lvl ${data.level} ${data.stars}:star: ${data.gear}.`,
                                     inline: true
                                 },
                                 {
