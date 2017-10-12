@@ -411,15 +411,32 @@ client.on("message", (message) => {
             case "ship-skills":
                 console.log("skills command triggered");
                 message.channel.send("Its on it's way <@" + message.author.id + ">");
-                getShipSkills(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
-                        `Here's ${args[0]} abilities for ${args[1]}`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
+                getShipSkills(args[0], args[1], function (data) {
+                    var fields = [];
+                    for (var i = 0; i < data.count; i++) {
+                        var field = {
+                            name: data[i].name + (data[i].crew ? ` (${data[i].crew})` : ""),
+                            value: data[i].level,
+                            inline: true
+                        };
+                        fields[i] = field;
+                    };
+                    message.channel.send({embed: {
+                        author: {
+                          name: client.user.username,
+                          icon_url: client.user.avatarURL
+                        },
+                        title: "Abilities for " + args[1],
+                        url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                        description: "At your current level",
+                        fields: fields,
+                        timestamp: new Date(),
+                        footer: {
+                          icon_url: client.user.avatarURL,
+                          text: "Generated on "
                         }
-                    );
+                      }
+                    });
                 });
                 break;
             case "ship-faction":
@@ -642,15 +659,37 @@ function getShipFaction(user, faction, callback) {
     });
 }
 function getShipSkills(user, ship, callback) {
-    console.log("getting ship skills for " + user + ", ship: " + ship);
-    const uuid = guid();
-    console.log("uuid: " + uuid);
-    var phantomjs = require("phantomjs-prebuilt");
-    var program = phantomjs.exec("./Phantom/getShipSkills.js", uuid, user, ship);
-    program.stdout.pipe(process.stdout);
-    program.stderr.pipe(process.stderr);
-    program.on("exit", code => {
-        callback(uuid);
+    console.log("getting ship skills for " + ship + " on profile " + user);
+    var url = 'https://swgoh.gg/u/' + user + '/ships/' + ship + '/';
+    console.log("start");
+
+    var request = require('request');
+    var cheerio = require('cheerio');
+
+    request(url, function (error, response, body) {
+        if (!error) {
+            var $ = cheerio.load(body);
+            var skills = $(".pc-skill");
+            var data = {};
+            var decode = require('decode-html');
+            for (var i = 0; i < skills.length; i++) {
+                var level = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul:nth-child(2) > li > div > div > div:nth-child(" + (i + 1) + ") > a > div.pc-skill-levels").attr("data-title");
+                var name = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul:nth-child(2) > li > div > div > div:nth-child(" + (i + 1) + ") > a > div.pc-skill-name").html();
+                var crew = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul:nth-child(2) > li > div > div > div:nth-child(" + (i + 1) + ") > div > div > a > div > img").attr("alt");
+                var ability = {
+                    "name": decode(name),
+                    "level": level
+                };
+                if (crew != undefined) {
+                    ability.crew = decode(crew);
+                }
+                data[i] = ability;
+            }
+            data["count"] = skills.length;
+            callback(data);
+        } else {
+            console.log("We’ve encountered an error: " + error);
+        }
     });
 }
 function getInfo(user, char, callback) {
