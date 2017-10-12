@@ -429,14 +429,30 @@ client.on("message", (message) => {
                 message.channel.send("Its on it's way <@" + message.author.id + ">");
                 getShipSkills(args[0], args[1], function (data) {
                     var fields = [];
+                    var numMaxed = 0;
                     for (var i = 0; i < data.count; i++) {
                         var field = {
-                            name: data[i].name + (data[i].crew ? ` (${data[i].crew})` : ""),
-                            value: data[i].level,
+                            name: `${data[i].name} (${data[i].abilityType})`,
+                            value: data[i].level + (data[i].crew ? `\n${data[i].crew}` : ""),
                             inline: true
                         };
                         fields[i] = field;
+                        if (field.value.endsWith("(MAXED)")) {
+                            numMaxed += 1;
+                        }
                     };
+                    var descriptionText =
+                        numMaxed == 0
+                            ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
+                            : (
+                                numMaxed == fields.length
+                                    ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
+                                    : (
+                                        numMaxed > (fields.length / 2)
+                                            ? `Good job! You've almost maxed all abilities`
+                                            : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
+                                    )
+                            );
                     message.channel.send({embed: {
                         author: {
                           name: client.user.username,
@@ -444,7 +460,7 @@ client.on("message", (message) => {
                         },
                         title: "Abilities for " + args[1],
                         url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                        description: "At your current level",
+                        description: descriptionText,
                         fields: fields,
                         timestamp: new Date(),
                         footer: {
@@ -733,11 +749,41 @@ function getShipSkills(user, ship, callback) {
                 data[i] = ability;
             }
             data["count"] = skills.length;
-            callback(data);
+            getAbilityType(ship, data, callback);
         } else {
             console.log("We’ve encountered an error: " + error);
         }
     });
+
+    function getAbilityType(ship, data, callback) {
+        var request = require('request');
+        var cheerio = require('cheerio');
+
+        request("https://swgoh.gg/ships/" + ship + "/", function (error, response, body) {
+          if (!error) {
+            var $ = cheerio.load(body);
+            var decode = require('decode-html');
+            var abilityTypes = {};
+            for (var i = 0; i < data.count; i++) {
+                var abilityName = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul > li:nth-child(" + ((i + 1) * 2) + ") > a > div > div > h5").html();
+                var abilityData = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul > li:nth-child(" + ((i + 1) * 2) + ") > a > div > div > small").html();
+                var abilityArray = abilityData.split("&#xB7;")
+                var abilityType = decode(abilityArray[1]).trim();
+                abilityName = decode(abilityName).trim();
+                if (abilityName.includes("<")) {
+                    abilityName = abilityName.substring(0, abilityName.indexOf("<")).trim();
+                }
+                abilityTypes[abilityName] = abilityType;
+            }
+            for (var i = 0; i < data.count; i++) {
+                data[i].abilityType = abilityTypes[data[i].name];
+            }
+            callback(data);
+          } else {
+            console.log("We’ve encountered an error: " + error);
+          }
+        });
+    }
 }
 function getInfo(user, char, callback) {
     console.log("getting info for " + char + " on profile " + user);
