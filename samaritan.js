@@ -326,6 +326,7 @@ client.on("message", (message) => {
                 message.channel.send("Its on the way via carrier pigeon <@" + message.author.id + ">");
                 getSkills(args[0], args[1], function (data) {
                     var fields = [];
+                    var numMaxed = 0;
                     for (var i = 0; i < data.count; i++) {
                         var field = {
                             name: data[i].name,
@@ -333,7 +334,11 @@ client.on("message", (message) => {
                             inline: true
                         };
                         fields[i] = field;
+                        if (field.value.endsWith("(MAXED)")) {
+                            numMaxed += 1;
+                        }
                     };
+                    var descriptionText = numMaxed == 0 ? `Awww, not one ability maxed here... ${config.emoji.disappointed}` : (numMaxed == fields.length ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out` : (numMaxed > (fields.length / 2) ? `Good job! You've almost maxed all abilities` : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`))
                     message.channel.send({embed: {
                         author: {
                           name: client.user.username,
@@ -341,7 +346,7 @@ client.on("message", (message) => {
                         },
                         title: "Abilities for " + args[1],
                         url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                        description: "At your current level",
+                        description: descriptionText,
                         fields: fields,
                         timestamp: new Date(),
                         footer: {
