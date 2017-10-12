@@ -329,7 +329,7 @@ client.on("message", (message) => {
                     var numMaxed = 0;
                     for (var i = 0; i < data.count; i++) {
                         var field = {
-                            name: data[i].name,
+                            name: `${data[i].name} (${data[i].abilityType})`,
                             value: data[i].level,
                             inline: true
                         };
@@ -338,7 +338,18 @@ client.on("message", (message) => {
                             numMaxed += 1;
                         }
                     };
-                    var descriptionText = numMaxed == 0 ? `Awww, not one ability maxed here... ${config.emoji.disappointed}` : (numMaxed == fields.length ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out` : (numMaxed > (fields.length / 2) ? `Good job! You've almost maxed all abilities` : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`))
+                    var descriptionText =
+                        numMaxed == 0
+                            ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
+                            : (
+                                numMaxed == fields.length
+                                    ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
+                                    : (
+                                        numMaxed > (fields.length / 2)
+                                            ? `Good job! You've almost maxed all abilities`
+                                            : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
+                                    )
+                            );
                     message.channel.send({embed: {
                         author: {
                           name: client.user.username,
@@ -626,6 +637,7 @@ function getSkills(user, char, callback) {
         for (var i = 0; i < skills.length; i++) {
             var level = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-levels").attr("data-title");
             var name = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-name").html();
+            var abilityURL = $("");
             var ability = {
                 "name": decode(name),
                 "level": level
@@ -633,11 +645,41 @@ function getSkills(user, char, callback) {
             data[i] = ability;
         }
         data["count"] = skills.length;
-        callback(data);
+        getAbilityType(char, data, callback);
       } else {
         console.log("We’ve encountered an error: " + error);
       }
     });
+
+    function getAbilityType(char, data, callback) {
+        var request = require('request');
+        var cheerio = require('cheerio');
+
+        request("https://swgoh.gg/characters/" + char + "/", function (error, response, body) {
+          if (!error) {
+            var $ = cheerio.load(body);
+            var decode = require('decode-html');
+            var abilityTypes = {};
+            for (var i = 0; i < data.count; i++) {
+                var abilityName = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul > li:nth-child(" + ((i + 1) * 2) + ") > a > div > div > h5").html();
+                var abilityData = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul > li:nth-child(" + ((i + 1) * 2) + ") > a > div > div > small").html();
+                var abilityArray = abilityData.split("&#xB7;")
+                var abilityType = decode(abilityArray[1]).trim();
+                abilityName = decode(abilityName).trim();
+                if (abilityName.includes("<")) {
+                    abilityName = abilityName.substring(0, abilityName.indexOf("<")).trim();
+                }
+                abilityTypes[abilityName] = abilityType;
+            }
+            for (var i = 0; i < data.count; i++) {
+                data[i].abilityType = abilityTypes[data[i].name];
+            }
+            callback(data);
+          } else {
+            console.log("We’ve encountered an error: " + error);
+          }
+        });
+    }
 }
 function getFaction(user, faction, callback) {
     console.log("getting characters for " + user + ", faction: " + faction);
