@@ -17,14 +17,22 @@ client.on("message", (message) => {
         console.log(error);
     }
     if (message.channel.name == config.tbRecords) {
+        var content = message.content.toString().replace(/,/g, "").replace(/\s/g, "");
+        var amount = getNum(message);
+        if (amount.toString() == "NaN") {
+            message.reply("Sorry but i couldn't understand that, please try a different format.\neg: 800k, 1.2mil, 950 000, 500000\nI'm going to delete your message for records sake")
+            .then(sentMessage => {
+                setTimeout( function() {
+                    sentMessage.delete();
+                    message.delete();
+                }, 5000);
+            });
+        }
         calculateGP(message);
     }
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
-        // var args = message.content.substring(1).split(' ');
-        // var cmd = args[0];
-        // args = args.splice(1);
 
         switch(command) {
             case "everyone":
@@ -467,47 +475,49 @@ function calculateGP(message) {
         limit: 100,
     }).then((messages) => {
         var total = 0;
-        // console.log(messages);
+        var num = 0;
         messages.forEach(
             function(currentValue, currentIndex, listObj) {
                 if (currentValue.author.bot) return;
                 var amount = getNum(currentValue);
                 total += amount;
+                num += 1;
             }
         );
-        message.channel.send(total.toLocaleString() + " GP available");
+        message.channel.send(num + ") " + total.toLocaleString() + " GP available");
     });
 
-    function getNum(currentValue) {
-        var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
-        var amount = 0;
-        try {
-            if (content.endsWith("k")) {
-                // console.log("thousand");
-                amount = parseInt(content.substring(0, content.length - 1).trim() * 1000);
-            }
-            else if (content.endsWith("m")) {
-                // console.log("mil 1");
-                amount = parseInt(content.substring(0, content.length - 1).trim() * 1000000);
-            }
-            else if (content.endsWith("mil")) {
-                // console.log("mil 2");
-                amount = parseInt(content.substring(0, content.length - 3).trim() * 1000000);
-            }
-            else if (content.endsWith("million")) {
-                // console.log("mil 3");
-                amount = parseInt(content.substring(0, content.length - 7).trim() * 1000000);
-            }
-            else {
-                // console.log("normal");
-                amount = parseInt(content);
-            }
-        } catch (e) {
-            console.log("Couldn't parse " + content);
+}
+
+function getNum(currentValue) {
+    var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
+    var amount = 0;
+    try {
+        if (content.endsWith("k")) {
+            // console.log("thousand");
+            amount = parseInt(content.substring(0, content.length - 1).trim() * 1000);
         }
-        // console.log("value(" + currentValue + "): " + amount);
-        return amount;
+        else if (content.endsWith("m")) {
+            // console.log("mil 1");
+            amount = parseInt(content.substring(0, content.length - 1).trim() * 1000000);
+        }
+        else if (content.endsWith("mil")) {
+            // console.log("mil 2");
+            amount = parseInt(content.substring(0, content.length - 3).trim() * 1000000);
+        }
+        else if (content.endsWith("million")) {
+            // console.log("mil 3");
+            amount = parseInt(content.substring(0, content.length - 7).trim() * 1000000);
+        }
+        else {
+            // console.log("normal");
+            amount = parseInt(content);
+        }
+    } catch (e) {
+        console.log("Couldn't parse " + content);
     }
+    // console.log("value(" + currentValue + "): " + amount);
+    return amount;
 }
 
 function purgeChannel(message) {
