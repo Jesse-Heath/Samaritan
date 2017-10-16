@@ -1,54 +1,46 @@
-var callback;
-var char = "wedge-antilles";
-var ship = "ghost";
-var user = "jessinator";
-    console.log("getting skills for " + char + " on profile " + user);
-    var url = 'https://swgoh.gg/u/' + user + '/collection/' + char + '/';
-    console.log("start");
+var amt1 = "1000000";
+var amt2 = "1,000,000";
+var amt3 = "900k";
+var amt4 = "1m";
+var amt5 = "1 mil";
+var amt6 = "900 000";
 
-    var request = require('request');
-    var cheerio = require('cheerio');
+var num1 = getNum(amt1);
+var num2 = getNum(amt2);
+var num3 = getNum(amt3);
+var num4 = getNum(amt4);
+var num5 = getNum(amt5);
+var num6 = getNum(amt6);
+var total = num1 + num2 + num3 + num4 + num5 + num6;
+console.log(total.toLocaleString());
 
-    request(url, function (error, response, body) {
-      if (!error) {
-        var $ = cheerio.load(body);
-        var skills = $(".pc-skill");
-        var data = {};
-        var decode = require('decode-html');
-        for (var i = 0; i < skills.length; i++) {
-            var level = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-levels").attr("data-title");
-            var name = $(".content-container-primary > .list-group.media-list.media-list-stream.m-b-sm:nth-child(3) > .media.list-group-item:nth-child(1) > .pc-skills > .pc-skills-list > .pc-skill:nth-child(" + (i + 1) + ") > .pc-skill-link > .pc-skill-name").html();
-            var abilityURL = $("");
-            var ability = {
-                "name": decode(name),
-                "level": level
-            };
-            data[i] = ability;
+function getNum(currentValue) {
+    var total = 0;
+    var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
+    try {
+        if (content.endsWith("k")) {
+            console.log("thousand");
+            var amount = parseInt(content.substring(0, content.length - 1).trim()) * 1000;
+            total += amount;
         }
-        data["count"] = skills.length;
-        getAbilityType(char, data, callback);
-      } else {
-        console.log("We’ve encountered an error: " + error);
-      }
-    });
-function getAbilityType(char, data, callback) {
-    var request = require('request');
-    var cheerio = require('cheerio');
-
-    request("https://swgoh.gg/characters/" + char + "/", function (error, response, body) {
-      if (!error) {
-        var $ = cheerio.load(body);
-        var decode = require('decode-html');
-        for (var i = 0; i < data.count; i++) {
-            var abilityData = $("body > div.container.p-t-sm > div.content-container > div.content-container-primary > ul > li:nth-child(" + ((i + 1) * 2) + ") > a > div > div > small").html();
-            var abilityArray = abilityData.split("&#xB7;")
-            var abilityType = decode(abilityArray[1]).trim();
-            data[i].abilityType = abilityType;
+        else if (content.endsWith("m")) {
+            console.log("mil 1");
+            var amount = parseInt(content.substring(0, content.length - 1).trim()) * 1000000;
+            total += amount;
         }
-        console.log(JSON.stringify(data));
-        // callback(data);
-      } else {
-        console.log("We’ve encountered an error: " + error);
-      }
-    });
+        else if (content.endsWith("mil")) {
+            console.log("mil 2");
+            var amount = parseInt(content.substring(0, content.length - 3).trim()) * 1000000;
+            total += amount;
+        }
+        else {
+            console.log("normal");
+            var amount = parseInt(content);
+            total += amount;
+        }
+    } catch (e) {
+        console.log("Couldn't parse " + content);
+    }
+    console.log("value(" + currentValue + "): " + total);
+    return total;
 }

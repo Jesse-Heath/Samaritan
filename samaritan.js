@@ -16,6 +16,9 @@ client.on("message", (message) => {
     } catch (error) {
         console.log(error);
     }
+    if (message.channel.name == config.tbRecords) {
+        calculateGP(message);
+    }
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
@@ -33,6 +36,12 @@ client.on("message", (message) => {
                         },
                         2000);
                     });
+                break;
+            case "gp":
+                calculateGP(message);
+                break;
+            case "purge":
+                purgeChannel(message);
                 break;
             case "remind":
                 console.log("remind command triggered");
@@ -498,6 +507,70 @@ client.on("message", (message) => {
 });
 
 client.login(auth.token);
+
+function calculateGP(message) {
+    var config = require("./Config/config.json");
+    var channel = message.guild.channels.find("name", config.tbRecords);
+    channel.fetchMessages({
+        limit: 100,
+    }).then((messages) => {
+        var total = 0;
+        // console.log(messages);
+        messages.forEach(
+            function(currentValue, currentIndex, listObj) {
+                if (currentValue.toString() == "&gp") return;
+                if (currentValue.author.bot) return;
+                var amount = getNum(currentValue);
+                total += amount;
+            }
+        );
+        message.channel.send(total.toLocaleString() + " GP available");
+    });
+
+    function getNum(currentValue) {
+        var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
+        var amount = 0;
+        try {
+            if (content.endsWith("k")) {
+                // console.log("thousand");
+                amount = parseInt(content.substring(0, content.length - 1).trim() * 1000);
+            }
+            else if (content.endsWith("m")) {
+                // console.log("mil 1");
+                amount = parseInt(content.substring(0, content.length - 1).trim() * 1000000);
+            }
+            else if (content.endsWith("mil")) {
+                // console.log("mil 2");
+                amount = parseInt(content.substring(0, content.length - 3).trim() * 1000000);
+            }
+            else if (content.endsWith("million")) {
+                // console.log("mil 3");
+                amount = parseInt(content.substring(0, content.length - 7).trim() * 1000000);
+            }
+            else {
+                // console.log("normal");
+                amount = parseInt(content);
+            }
+        } catch (e) {
+            console.log("Couldn't parse " + content);
+        }
+        // console.log("value(" + currentValue + "): " + amount);
+        return amount;
+    }
+}
+
+function purgeChannel(message) {
+    var config = require("./Config/config.json");
+    var channel = message.guild.channels.find("name", config.tbRecords);
+    channel.fetchMessages({
+        limit: 100,
+    }).then((messages) => {
+        if (messages.size == 100) {
+            purgeChannel(message);
+        }
+        channel.bulkDelete(messages).catch(error => console.log(error.stack));
+    });
+}
 
 function remindMe(howManyTimesToRun, timeToWait, callback) {
     for (var i = 0; i < howManyTimesToRun; i++) {
