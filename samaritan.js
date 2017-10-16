@@ -4,6 +4,7 @@ const client = new Discord.Client();
 
 client.on("ready", () => {
     console.log("Systems initialized");
+    client.user.setPresence({game: {name: "with my code", type: 0}});
 });
 
 client.on("message", (message) => {
@@ -28,7 +29,9 @@ client.on("message", (message) => {
                 }, 5000);
             });
         }
-        calculateGP(message);
+        else {
+            calculateGP(message);
+        }
     }
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
