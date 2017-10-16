@@ -37,9 +37,6 @@ client.on("message", (message) => {
                         2000);
                     });
                 break;
-            case "gp":
-                calculateGP(message);
-                break;
             case "purge":
                 purgeChannel(message);
                 break;
@@ -518,7 +515,6 @@ function calculateGP(message) {
         // console.log(messages);
         messages.forEach(
             function(currentValue, currentIndex, listObj) {
-                if (currentValue.toString() == "&gp") return;
                 if (currentValue.author.bot) return;
                 var amount = getNum(currentValue);
                 total += amount;

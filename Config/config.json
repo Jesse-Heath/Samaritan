@@ -1,0 +1,13 @@
+{
+    "commandPrefix": "&",
+    "tbRecords": "test-purge2",
+    "emoji": {
+        "worker": ":construction_worker:",
+        "construction": ":construction:",
+        "gear": ":gear:",
+        "star": ":star:",
+        "thumbsUp": ":thumbsup:",
+        "disappointed": ":disappointed:",
+        "slightSmile": ":slight_smile:"
+    }
+}
