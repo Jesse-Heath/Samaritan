@@ -64,80 +64,6 @@ client.on("message", (message) => {
                     );
                 });
                 break;
-            case "test":
-                console.log("test command triggered");
-                message.channel.send({
-                    embed: {
-                        author: {
-                            name: client.user.username,
-                            icon_url: client.user.avatarURL
-                        },
-                        title: "C-3P0 Stats",
-                        url: "http://swgoh.gg/characters/c-3po",
-                        fields: [
-                            {
-                                name: "Info",
-                                value: `Lvl 90 8* G13.`,
-                                inline: true
-                            },
-                            {
-                                name: "Health",
-                                value: "100 000",
-                                inline: true
-                            },
-                            {
-                                name: "Protection",
-                                value: "100 000",
-                                inline: true
-                            },
-                            {
-                                name: "Speed",
-                                value: "400",
-                                inline: true
-                            },
-                            {
-                                name: "Potency",
-                                value: "150%",
-                                inline: true
-                            },
-                            {
-                                name: "Tenacity",
-                                value: "150%",
-                                inline: true
-                            },
-                            {
-                                name: "Crit Damage",
-                                value: "250%",
-                                inline: true
-                            },
-                            {
-                                name: "Basic Crit Chance",
-                                value: "150%",
-                                inline: true
-                            },
-                            {
-                                name: "Special Crit Chance",
-                                value: "150%",
-                                inline: true
-                            },
-                            {
-                                name: "Basic Damage",
-                                value: "9999",
-                                inline: true
-                            },
-                            {
-                                name: "Special Damage",
-                                value: "9999",
-                                inline: true
-                            }
-                        ],
-                        timestamp: new Date(),
-                        footer: {
-                            icon_url: client.user.avatarURL,
-                        }
-                    }
-                });
-                break;
             case "help":
                 console.log("help command triggered");
                 var content = `Hello <@${message.author.id}>. Here's my available commands so far:\n`;
@@ -161,19 +87,21 @@ client.on("message", (message) => {
                 message.channel.send(content);
                 break;
             case "meta":
-                message.channel.send("Roger roger, compiling meta report...");
-                getMeta(1, function (uuid1) {
-                    console.log(uuid1);
-                    getMeta(2, function (uuid2) {
-                        message.channel.send(
-                            "Meta Report:",
-                            {
-                                files: [
-                                    "/tmp/" + uuid1 + ".png",
-                                    "/tmp/" + uuid2 + ".png"
-                                ]
-                            }
-                        );
+                message.channel.send("Roger roger, compiling meta report...")
+                .then(sentMessage => {
+                    getMeta(1, function (uuid1) {
+                        getMeta(2, function (uuid2) {
+                            sentMessage.delete();
+                            message.channel.send(
+                                "Meta Report:",
+                                {
+                                    files: [
+                                        "/tmp/" + uuid1 + ".png",
+                                        "/tmp/" + uuid2 + ".png"
+                                    ]
+                                }
+                            );
+                        });
                     });
                 });
                 // message.channel.send(`${config.emoji.construction} Currently in development ${config.emoji.worker}`);
@@ -183,312 +111,339 @@ client.on("message", (message) => {
                 break;
             case "mods":
                 console.log("mods command triggered");
-                message.channel.send("Sure thing <@" + message.author.id + ">. Give me a moment...");
-                getMods(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
-                        `Here's ${args[0]} mods on ${args[1]}`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
+                message.channel.send("Sure thing <@" + message.author.id + ">. Give me a moment...")
+                .then(sentMessage => {
+                    getMods(args[0], args[1], function (uuid) {
+                        sentMessage.delete();
+                        var result = message.channel.send(
+                            `Here's ${args[0]} mods on ${args[1]}`,
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
+                            }
+                        );
+                    });
                 });
                 break;
             case "info":
                 console.log("info command triggered");
-                message.channel.send("Compiling data <@" + message.author.id + ">");
-                getInfo(args[0], args[1], function (data) {
-                    message.channel.send({
-                        embed: {
-                            author: {
-                                name: client.user.username,
-                                icon_url: client.user.avatarURL
-                            },
-                            title: args[1] + " Stats",
-                            url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                            fields: [
-                                {
-                                    name: "Info",
-                                    value: `Lvl ${data.level} ${data.stars}:star: ${data.gear}.`,
-                                    inline: true
+                message.channel.send("Compiling data <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getInfo(args[0], args[1], function (data) {
+                        sentMessage.delete();
+                        message.channel.send({
+                            embed: {
+                                author: {
+                                    name: client.user.username,
+                                    icon_url: client.user.avatarURL
                                 },
-                                {
-                                    name: "Health",
-                                    value: data.health,
-                                    inline: true
-                                },
-                                {
-                                    name: "Protection",
-                                    value: data.protection,
-                                    inline: true
-                                },
-                                {
-                                    name: "Speed",
-                                    value: data.speed,
-                                    inline: true
-                                },
-                                {
-                                    name: "Potency",
-                                    value: data.potency,
-                                    inline: true
-                                },
-                                {
-                                    name: "Tenacity",
-                                    value: data.tenacity,
-                                    inline: true
-                                },
-                                {
-                                    name: "Crit Damage",
-                                    value: data.crit_damage,
-                                    inline: true
-                                },
-                                {
-                                    name: "Basic Crit Chance",
-                                    value: data.basic_crit_chance,
-                                    inline: true
-                                },
-                                {
-                                    name: "Special Crit Chance",
-                                    value: data.special_crit_chance,
-                                    inline: true
-                                },
-                                {
-                                    name: "Basic Damage",
-                                    value: data.basic_damage,
-                                    inline: true
-                                },
-                                {
-                                    name: "Special Damage",
-                                    value: data.special_damage,
-                                    inline: true
+                                title: args[1] + " Stats",
+                                url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                                fields: [
+                                    {
+                                        name: "Info",
+                                        value: `Lvl ${data.level} ${data.stars}:star: ${data.gear}.`,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Health",
+                                        value: data.health,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Protection",
+                                        value: data.protection,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Speed",
+                                        value: data.speed,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Potency",
+                                        value: data.potency,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Tenacity",
+                                        value: data.tenacity,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Crit Damage",
+                                        value: data.crit_damage,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Basic Crit Chance",
+                                        value: data.basic_crit_chance,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Special Crit Chance",
+                                        value: data.special_crit_chance,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Basic Damage",
+                                        value: data.basic_damage,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Special Damage",
+                                        value: data.special_damage,
+                                        inline: true
+                                    }
+                                ],
+                                timestamp: new Date(),
+                                footer: {
+                                    icon_url: client.user.avatarURL,
                                 }
-                            ],
-                            timestamp: new Date(),
-                            footer: {
-                                icon_url: client.user.avatarURL,
                             }
-                        }
+                        });
                     });
                 });
                 break;
             case "gear":
                 console.log("gear command triggered");
-                message.channel.send("I'll get right on that <@" + message.author.id + ">");
-                getGearLevel(args[0], args[1], function (uuid, data) {
-                    message.channel.send(
-                        `Here's ${args[0]} gear level for ${args[1]}`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
-                    var fields = [];
-                    for (var i = 0; i < data.length; i++) {
-                        var field = {
-                            name: "Needed:",
-                            value: data[i],
-                            inline: true
-                        };
-                        fields.push(field);
-                    };
-                    setTimeout( function() {
-                        message.channel.send({
-                            embed: {
-                                author: {
-                                  name: client.user.username,
-                                  icon_url: client.user.avatarURL
-                                },
-                                title: "Your also need these gear",
-                                url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                                fields: fields,
-                                timestamp: new Date(),
-                                footer: {
-                                  icon_url: client.user.avatarURL,
-                                  text: ""
-                                }
+                message.channel.send("I'll get right on that <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getGearLevel(args[0], args[1], function (uuid, data) {
+                        sentMessage.delete();
+                        message.channel.send(
+                            `Here's ${args[0]} gear level for ${args[1]}`,
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
                             }
-                        });
-                    }, 2000);
+                        );
+                        var fields = [];
+                        for (var i = 0; i < data.length; i++) {
+                            var field = {
+                                name: "Needed:",
+                                value: data[i],
+                                inline: true
+                            };
+                            fields.push(field);
+                        };
+                        setTimeout( function() {
+                            message.channel.send({
+                                embed: {
+                                    author: {
+                                      name: client.user.username,
+                                      icon_url: client.user.avatarURL
+                                    },
+                                    title: "Your also need these gear",
+                                    url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                                    fields: fields,
+                                    timestamp: new Date(),
+                                    footer: {
+                                      icon_url: client.user.avatarURL,
+                                      text: ""
+                                    }
+                                }
+                            });
+                        }, 2000);
+                    });
                 });
                 break;
             case "gear-needed":
                 console.log("gear command triggered");
-                message.channel.send("So demanding <@" + message.author.id + ">...");
-                getGearNeeded(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
-                        `Here's ${args[0]} gear needed for ${args[1]}`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
+                message.channel.send("So demanding <@" + message.author.id + ">...")
+                .then(sentMessage => {
+                    getGearNeeded(args[0], args[1], function (uuid) {
+                        sentMessage.delete();
+                        var result = message.channel.send(
+                            `Here's ${args[0]} gear needed for ${args[1]}`,
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
+                            }
+                        );
+                    });
                 });
                 break;
             case "skills":
                 console.log("skills command triggered");
-                message.channel.send("Its on the way via carrier pigeon <@" + message.author.id + ">");
-                getSkills(args[0], args[1], function (data) {
-                    var fields = [];
-                    var numMaxed = 0;
-                    for (var i = 0; i < data.count; i++) {
-                        var field = {
-                            name: `${data[i].name} (${data[i].abilityType})`,
-                            value: data[i].level,
-                            inline: true
+                message.channel.send("Its on the way via carrier pigeon <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getSkills(args[0], args[1], function (data) {
+                        var fields = [];
+                        var numMaxed = 0;
+                        for (var i = 0; i < data.count; i++) {
+                            var field = {
+                                name: `${data[i].name} (${data[i].abilityType})`,
+                                value: data[i].level,
+                                inline: true
+                            };
+                            fields[i] = field;
+                            if (field.value.endsWith("(MAXED)")) {
+                                numMaxed += 1;
+                            }
                         };
-                        fields[i] = field;
-                        if (field.value.endsWith("(MAXED)")) {
-                            numMaxed += 1;
-                        }
-                    };
-                    var descriptionText =
-                        numMaxed == 0
-                            ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
-                            : (
-                                numMaxed == fields.length
-                                    ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
-                                    : (
-                                        numMaxed > (fields.length / 2)
-                                            ? `Good job! You've almost maxed all abilities`
-                                            : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
-                                    )
-                            );
-                    message.channel.send({embed: {
-                        author: {
-                          name: client.user.username,
-                          icon_url: client.user.avatarURL
-                        },
-                        title: "Abilities for " + args[1],
-                        url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                        description: descriptionText,
-                        fields: fields,
-                        timestamp: new Date(),
-                        footer: {
-                          icon_url: client.user.avatarURL,
-                          text: "Generated on "
-                        }
-                      }
+                        var descriptionText =
+                            numMaxed == 0
+                                ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
+                                : (
+                                    numMaxed == fields.length
+                                        ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
+                                        : (
+                                            numMaxed > (fields.length / 2)
+                                                ? `Good job! You've almost maxed all abilities`
+                                                : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
+                                        )
+                                );
+                        sentMessage.delete();
+                        message.channel.send({embed: {
+                            author: {
+                              name: client.user.username,
+                              icon_url: client.user.avatarURL
+                            },
+                            title: "Abilities for " + args[1],
+                            url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                            description: descriptionText,
+                            fields: fields,
+                            timestamp: new Date(),
+                            footer: {
+                              icon_url: client.user.avatarURL,
+                              text: "Generated on "
+                            }
+                          }
+                        });
                     });
                 });
                 break;
             case "faction":
                 console.log("faction command triggered");
-                message.channel.send("Fine, i will fetch it for you <@" + message.author.id + ">");
-                getFaction(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
-                        `Here's ${args[0]} characters for ${args[1]} faction`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
+                message.channel.send("Fine, i will fetch it for you <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getFaction(args[0], args[1], function (uuid) {
+                        sentMessage.delete();
+                        var result = message.channel.send(
+                            `Here's ${args[0]} characters for ${args[1]} faction`,
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
+                            }
+                        );
+                    });
                 });
                 break;
             case "arena":
-                message.channel.send("Formulating data...");
-                getArena(args[0], function (uuid, data) {
-                    message.channel.send(
-                        args[0] + " current arena team",
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
-                    var fields = [];
-                    for (var i = 0; i < data.length; i++) {
-                        var field = {
-                            name: data[i].data.stars + ":star: " + data[i].data.gear + " " + data[i].name,
-                            value: data[i].data.speed + " Speed\n" + data[i].data.health + " Health\n" + data[i].data.protection + " Protection",
-                            inline: true
-                        };
-                        fields.push(field);
-                    };
-                    setTimeout( function() {
-                        var rankState = data.currentRank > data.averageRank;
-                        message.channel.send({
-                            embed: {
-                                author: {
-                                  name: client.user.username,
-                                  icon_url: client.user.avatarURL
-                                },
-                                title: "Some basic details on your team",
-                                description: (rankState ? "Good work, your arena rank is improving" : "Unfortunatley your arena rank is dropping") + `. Your current rank is ${data.currentRank} which is ` + (rankState ? "better" : "worse") + ` than your average rank of ${data.averageRank}.\nHighest recorded rank is ${data.highestRank}\nLowest recorded rank is ${data.lowestRank}`,
-                                url: "https://swgoh.gg/u/" + args[0],
-                                fields: fields,
-                                timestamp: new Date(),
-                                footer: {
-                                  icon_url: client.user.avatarURL,
-                                  text: ""
-                                }
+                message.channel.send("Formulating data...")
+                .then(sentMessage => {
+                    getArena(args[0], function (uuid, data) {
+                        sentMessage.delete();
+                        message.channel.send(
+                            args[0] + " current arena team",
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
                             }
-                        });
-                    }, 2000);
+                        );
+                        var fields = [];
+                        for (var i = 0; i < data.length; i++) {
+                            var field = {
+                                name: data[i].data.stars + ":star: " + data[i].data.gear + " " + data[i].name,
+                                value: data[i].data.speed + " Speed\n" + data[i].data.health + " Health\n" + data[i].data.protection + " Protection",
+                                inline: true
+                            };
+                            fields.push(field);
+                        };
+                        setTimeout( function() {
+                            var rankState = data.currentRank > data.averageRank;
+                            message.channel.send({
+                                embed: {
+                                    author: {
+                                      name: client.user.username,
+                                      icon_url: client.user.avatarURL
+                                    },
+                                    title: "Some basic details on your team",
+                                    description: (rankState ? "Good work, your arena rank is improving" : "Unfortunatley your arena rank is dropping") + `. Your current rank is ${data.currentRank} which is ` + (rankState ? "better" : "worse") + ` than your average rank of ${data.averageRank}.\nHighest recorded rank is ${data.highestRank}\nLowest recorded rank is ${data.lowestRank}`,
+                                    url: "https://swgoh.gg/u/" + args[0],
+                                    fields: fields,
+                                    timestamp: new Date(),
+                                    footer: {
+                                      icon_url: client.user.avatarURL,
+                                      text: ""
+                                    }
+                                }
+                            });
+                        }, 2000);
+                    });
                 });
                 break;
             case "ship-skills":
                 console.log("skills command triggered");
-                message.channel.send("Its on it's way <@" + message.author.id + ">");
-                getShipSkills(args[0], args[1], function (data) {
-                    var fields = [];
-                    var numMaxed = 0;
-                    for (var i = 0; i < data.count; i++) {
-                        var field = {
-                            name: `${data[i].name} (${data[i].abilityType})`,
-                            value: data[i].level + (data[i].crew ? `\n${data[i].crew}` : ""),
-                            inline: true
+                message.channel.send("Its on it's way <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getShipSkills(args[0], args[1], function (data) {
+                        var fields = [];
+                        var numMaxed = 0;
+                        for (var i = 0; i < data.count; i++) {
+                            var field = {
+                                name: `${data[i].name} (${data[i].abilityType})`,
+                                value: data[i].level + (data[i].crew ? `\n${data[i].crew}` : ""),
+                                inline: true
+                            };
+                            fields[i] = field;
+                            if (field.value.endsWith("(MAXED)")) {
+                                numMaxed += 1;
+                            }
                         };
-                        fields[i] = field;
-                        if (field.value.endsWith("(MAXED)")) {
-                            numMaxed += 1;
-                        }
-                    };
-                    var descriptionText =
-                        numMaxed == 0
-                            ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
-                            : (
-                                numMaxed == fields.length
-                                    ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
-                                    : (
-                                        numMaxed > (fields.length / 2)
-                                            ? `Good job! You've almost maxed all abilities`
-                                            : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
-                                    )
-                            );
-                    message.channel.send({embed: {
-                        author: {
-                          name: client.user.username,
-                          icon_url: client.user.avatarURL
-                        },
-                        title: "Abilities for " + args[1],
-                        url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
-                        description: descriptionText,
-                        fields: fields,
-                        timestamp: new Date(),
-                        footer: {
-                          icon_url: client.user.avatarURL,
-                          text: "Generated on "
-                        }
-                      }
+                        var descriptionText =
+                            numMaxed == 0
+                                ? `Awww, not one ability maxed here... ${config.emoji.disappointed}`
+                                : (
+                                    numMaxed == fields.length
+                                        ? `Awesome job ${config.emoji.thumbsUp} All your abilities are maxed out`
+                                        : (
+                                            numMaxed > (fields.length / 2)
+                                                ? `Good job! You've almost maxed all abilities`
+                                                : `You're getting there, but you should work on your abilities a bit more ${config.emoji.slightSmile}`
+                                        )
+                                );
+                        sentMessage.delete();
+                        message.channel.send({embed: {
+                            author: {
+                                name: client.user.username,
+                                icon_url: client.user.avatarURL
+                            },
+                            title: "Abilities for " + args[1],
+                            url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
+                            description: descriptionText,
+                            fields: fields,
+                            timestamp: new Date(),
+                            footer: {
+                                icon_url: client.user.avatarURL,
+                                text: "Generated on "
+                            }
+                          }
+                        });
                     });
                 });
                 break;
             case "ship-faction":
                 console.log("ship faction command triggered");
-                message.channel.send("Ok, collecting data <@" + message.author.id + ">");
-                getShipFaction(args[0], args[1], function (uuid) {
-                    var result = message.channel.send(
-                        `Here's ${args[0]} ships for ${args[1]} faction`,
-                        {
-                            files: [
-                                "/tmp/" + uuid + ".png"
-                            ]
-                        }
-                    );
+                message.channel.send("Ok, collecting data <@" + message.author.id + ">")
+                .then(sentMessage => {
+                    getShipFaction(args[0], args[1], function (uuid) {
+                        sentMessage.delete();
+                        var result = message.channel.send(
+                            `Here's ${args[0]} ships for ${args[1]} faction`,
+                            {
+                                files: [
+                                    "/tmp/" + uuid + ".png"
+                                ]
+                            }
+                        );
+                    });
                 });
                 break;
             case "guild-info":
