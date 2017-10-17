@@ -49,58 +49,70 @@ client.on("message", (message) => {
                     });
                 break;
             case "purge":
-                message.channel.send('Are you sure? Answer yes or no')
-                .then(sentMessage => {
-                    message.channel.awaitMessages(response => (response.content === 'yes' || response.content === 'no'), {
-                        max: 1,
-                        time: 30000,
-                        errors: ['time'],
-                    })
-                    .then((collected) => {
-                        if (collected.first().content.toLowerCase() === "yes") {
-                            message.channel.send(`Ok, purging channel...`)
-                            .then(sentMessage2 => {
-                                setTimeout(function() {
-                                    sentMessage2.delete();
-                                    collected.first().delete();
-                                    sentMessage.delete();
-                                    message.delete();
-                                    purgeChannel(message);
-                                }, 5000);
-                            });
-                        } else if (collected.first().content.toLowerCase() === "no") {
-                            message.channel.send(`Next time be sure before you ask me ${config.emoji.angry}`)
-                            .then(sentMessage2 => {
-                                setTimeout(function() {
-                                    sentMessage2.delete();
-                                    collected.first().delete();
-                                    sentMessage.delete();
-                                    message.delete();
-                                }, 5000);
-                            });
-                        } else {
-                            message.channel.send(`Unknown response ${config.emoji.shrug}`)
-                            .then(sentMessage2 => {
-                                setTimeout(function() {
-                                    sentMessage2.delete();
-                                    collected.first().delete();
-                                    sentMessage.delete();
-                                    message.delete();
-                                }, 5000);
-                            });
+                var doesHeHaveThePower = false;
+                message.member.roles.forEach(
+                    function(role, currentIndex, listObj) {
+                        if (role.name === "Officers" || role.name === "admin") {
+                            doesHeHaveThePower = true;
                         }
-                    })
-                    .catch(() => {
-                        message.channel.send(`You took to long! ${config.emoji.shrug} I\'m not doing it any more`)
-                        .then(sentMessage2 => {
-                            setTimeout(function() {
-                                message.delete();
-                                sentMessage.delete();
-                                sentMessage2.delete();
-                            }, 5000);
+                    }
+                );
+                if (doesHeHaveThePower) {
+                    message.channel.send('Are you sure? Answer yes or no')
+                    .then(sentMessage => {
+                        message.channel.awaitMessages(response => (response.content === 'yes' || response.content === 'no'), {
+                            max: 1,
+                            time: 30000,
+                            errors: ['time'],
+                        })
+                        .then((collected) => {
+                            if (collected.first().content.toLowerCase() === "yes") {
+                                message.channel.send(`Ok, purging channel...`)
+                                .then(sentMessage2 => {
+                                    setTimeout(function() {
+                                        sentMessage2.delete();
+                                        collected.first().delete();
+                                        sentMessage.delete();
+                                        message.delete();
+                                        purgeChannel(message);
+                                    }, 5000);
+                                });
+                            } else if (collected.first().content.toLowerCase() === "no") {
+                                message.channel.send(`Next time be sure before you ask me ${config.emoji.angry}`)
+                                .then(sentMessage2 => {
+                                    setTimeout(function() {
+                                        sentMessage2.delete();
+                                        collected.first().delete();
+                                        sentMessage.delete();
+                                        message.delete();
+                                    }, 5000);
+                                });
+                            } else {
+                                message.channel.send(`Unknown response ${config.emoji.shrug}`)
+                                .then(sentMessage2 => {
+                                    setTimeout(function() {
+                                        sentMessage2.delete();
+                                        collected.first().delete();
+                                        sentMessage.delete();
+                                        message.delete();
+                                    }, 5000);
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            message.channel.send(`You took to long! ${config.emoji.shrug} I\'m not doing it any more`)
+                            .then(sentMessage2 => {
+                                setTimeout(function() {
+                                    message.delete();
+                                    sentMessage.delete();
+                                    sentMessage2.delete();
+                                }, 5000);
+                            });
                         });
                     });
-                });
+                } else {
+                    message.channel.send(`<@${message.author.id}>, Sorry but you don't have the power`);
+                }
                 break;
             case "remind":
                 console.log("remind command triggered");
