@@ -8,6 +8,9 @@
         "star": ":star:",
         "thumbsUp": ":thumbsup:",
         "disappointed": ":disappointed:",
-        "slightSmile": ":slight_smile:"
+        "slightSmile": ":slight_smile:",
+        "angry": ":angry:",
+        "shrug": ":shrug:",
+        "timer": ":timer:"
     }
 }
