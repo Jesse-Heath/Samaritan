@@ -534,7 +534,9 @@ function calculateGP(message) {
             function(currentValue, currentIndex, listObj) {
                 if (currentValue.author.bot) return;
                 var amount = getNum(currentValue);
-                total += amount;
+                if (amount.toString() !== "NaN") {
+                    total += amount;
+                }
                 num += 1;
             }
         );

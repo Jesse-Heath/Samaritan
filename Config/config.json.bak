@@ -1,6 +1,6 @@
 {
-    "commandPrefix": "&",
-    "tbRecords": "test-purge2",
+    "commandPrefix": "{COMMAND_PREFIX}",
+    "tbRecords": "{TB_RECORDS_CHANNEL_NAME}",
     "emoji": {
         "worker": ":construction_worker:",
         "construction": ":construction:",
