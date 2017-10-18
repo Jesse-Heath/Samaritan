@@ -6,7 +6,6 @@ client.on("ready", () => {
     console.log("Systems initialized");
     client.user.setPresence({game: {name: "humans like a chessboard", type: 0}});
     client.user.setUsername("Samaritan");
-    console.log(Object.getOwnPropertyNames(client.user));
 });
 
 client.on("message", (message) => {
