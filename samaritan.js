@@ -34,6 +34,9 @@ client.on("message", (message) => {
             calculateGP(message);
         }
     }
+    if (message.channel.type == "dm") {
+        message.channel.send("Ooh, a personal chat, shall we gossip?");
+    }
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
