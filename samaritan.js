@@ -561,7 +561,11 @@ function getNum(currentValue) {
     var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
     var amount = 0;
     try {
-        if (content.endsWith("k")) {
+        if (content.indexOf(")") !== -1) {
+            // console.log("bracket");
+            amount = getNum(content.substring(content.indexOf(")") + 1, content.length).trim());
+        }
+        else if (content.endsWith("k")) {
             // console.log("thousand");
             amount = parseInt(content.substring(0, content.length - 1).trim() * 1000);
         }
@@ -573,8 +577,12 @@ function getNum(currentValue) {
             // console.log("mil 2");
             amount = parseInt(content.substring(0, content.length - 3).trim() * 1000000);
         }
-        else if (content.endsWith("million")) {
+        else if (content.endsWith("mill")) {
             // console.log("mil 3");
+            amount = parseInt(content.substring(0, content.length - 4).trim() * 1000000);
+        }
+        else if (content.endsWith("million")) {
+            // console.log("mil 4");
             amount = parseInt(content.substring(0, content.length - 7).trim() * 1000000);
         }
         else {
