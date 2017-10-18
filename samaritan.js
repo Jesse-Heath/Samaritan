@@ -52,6 +52,28 @@ client.on("message", (message) => {
                         2000);
                     });
                 break;
+            case "time":
+                message.channel.send(`:clock12:`)
+                .then(sentMessage => {
+                    for (var i = 0; i < 12*5; i++) {
+                        setTimeout(sendTime, (i + 1) * 500, sentMessage, i + 1);
+                    }
+                    function sendTime(sentMessage, num) {
+                        sentMessage.edit(`:clock` + ((num % 12) + 1) + `:`);
+                    }
+                });
+                break;
+            case "face":
+                message.channel.send(`${config.emoji.faces[0]}`)
+                .then(sentMessage => {
+                    for (var i = 0; i < 4*5; i++) {
+                        setTimeout(sendTime, (i + 1) * 500, sentMessage, i);
+                    }
+                    function sendTime(sentMessage, num) {
+                        sentMessage.edit(`${config.emoji.faces[num % 4]}`);
+                    }
+                });
+                break;
             case "purge":
                 var doesHeHaveThePower = false;
                 message.member.roles.forEach(

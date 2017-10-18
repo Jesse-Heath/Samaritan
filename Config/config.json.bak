@@ -11,6 +11,12 @@
         "slightSmile": ":slight_smile:",
         "angry": ":angry:",
         "shrug": ":shrug:",
-        "timer": ":timer:"
+        "timer": ":timer:",
+        "faces": [
+            ":grinning:",
+            ":kissing_heart:",
+            ":grinning:",
+            ":wink:"
+        ]
     }
 }
