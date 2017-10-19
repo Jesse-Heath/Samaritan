@@ -1,3 +1,4 @@
+// rgb color calc = https://www.shodor.org/stella2java/rgbint.html
 var auth = require("./Config/auth.json");
 const Discord = require("discord.js");
 const client = new Discord.Client();
@@ -186,6 +187,44 @@ client.on("message", (message) => {
                     content += `\n\nThat's all folks!`;
                 message.channel.send(content);
                 break;
+            case "zeta":
+                message.channel.send("Fetching your zeta's..")
+                .then(sentMessage => {
+                    getZetas(args[0], function(data) {
+                        sentMessage.delete();
+                        var fields = [];
+
+                        for (var i = 0; i < data.zetas.length; i++) {
+                            var text = data.zetas[i].zetas.join("\n");
+                            var field = {
+                                name: data.zetas[i].name,
+                                value: text,
+                                inline: true
+                            };
+                            fields.push(field);
+                        };
+                        setTimeout( function() {
+                            message.channel.send({
+                                embed: {
+                                    author: {
+                                      name: client.user.username,
+                                      icon_url: client.user.avatarURL
+                                    },
+                                    color: 7609788,
+                                    title: "You have " + data.num + " zeta's",
+                                    fields: fields,
+                                    timestamp: new Date(),
+                                    footer: {
+                                      icon_url: client.user.avatarURL,
+                                      text: ""
+                                    }
+                                }
+                            });
+                        }, 2000);
+                    });
+                });
+                console.log("finished message processing");
+                break;
             case "meta":
                 message.channel.send("Roger roger, compiling meta report...")
                 .then(sentMessage => {
@@ -238,6 +277,7 @@ client.on("message", (message) => {
                                     name: client.user.username,
                                     icon_url: client.user.avatarURL
                                 },
+                                color: 59120,
                                 title: args[1] + " Stats",
                                 url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
                                 fields: [
@@ -403,6 +443,7 @@ client.on("message", (message) => {
                               name: client.user.username,
                               icon_url: client.user.avatarURL
                             },
+                            color: 7929720,
                             title: "Abilities for " + args[1],
                             url: "https://swgoh.gg/u/" + args[0] + "/collection/" + args[1] + "/",
                             description: descriptionText,
@@ -457,13 +498,14 @@ client.on("message", (message) => {
                             fields.push(field);
                         };
                         setTimeout( function() {
-                            var rankState = data.currentRank > data.averageRank;
+                            var rankState = data.currentRank < data.averageRank;
                             message.channel.send({
                                 embed: {
                                     author: {
                                       name: client.user.username,
                                       icon_url: client.user.avatarURL
                                     },
+                                    color: rankState ? 65280 : 16711680,
                                     title: "Some basic details on your team",
                                     description: (rankState ? "Good work, your arena rank is improving" : "Unfortunatley your arena rank is dropping") + `. Your current rank is ${data.currentRank} which is ` + (rankState ? "better" : "worse") + ` than your average rank of ${data.averageRank}.\nHighest recorded rank is ${data.highestRank}\nLowest recorded rank is ${data.lowestRank}`,
                                     url: "https://swgoh.gg/u/" + args[0],
@@ -643,6 +685,60 @@ function remindMe(howManyTimesToRun, timeToWait, callback) {
             },
             timeToWait * (i + 1)
         );
+    }
+}
+
+function getZetas(user, callback) {
+    console.log("getting zetas for " + user);
+    var userURL = 'https://swgoh.gg/u/' + user;
+
+    var request = require('request');
+    var cheerio = require('cheerio');
+    request(userURL, function (error, response, body) {
+        if (!error) {
+            var $ = cheerio.load(body);
+            var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
+            guildURL = "https://swgoh.gg" + guildURL + "?stats=zetas";
+            getZeta(guildURL, callback);
+        }
+    });
+
+    function getZeta(guildURL, callback) {
+        var request = require('request');
+        var cheerio = require('cheerio');
+        request(guildURL , function (error, response, body) {
+            if (!error) {
+                var $ = cheerio.load(body);
+                var numUsers = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody").html();
+                numUsers = numUsers.split("<tr>");
+                for (var i = 0; i < (numUsers.length - 1); i++) {
+                    var username = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a").attr("href");
+                    if (username == `/u/${user}/`) {
+                        var data = {};
+                        var numTotalZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td.text-center").html();
+                        data.num = numTotalZetas;
+                        var chars = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3)").html();
+                        chars = chars.split("<div class=\"guild-member-zeta\">");
+                        data.zetas = [];
+                        for (var k = 0; k < (chars.length - 1); k++) {
+                            var char = {};
+                            var name = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-character > div").attr("title");
+                            char.name = name;
+                            var numZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-abilities").html();
+                            numZetas = numZetas.split("<img class=\"guild-member-zeta-ability\"");
+                            char.zetas = [];
+                            for (var j = 0; j < (numZetas.length - 1); j++) {
+                                var zeta = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-abilities > img:nth-child(" + (j + 1) + ")").attr("title");
+                                char.zetas.push(zeta);
+                            }
+                            data.zetas.push(char);
+                        }
+                        callback(data);
+                        break;
+                    }
+                }
+            }
+        });
     }
 }
 

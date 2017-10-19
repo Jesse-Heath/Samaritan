@@ -1,46 +1,55 @@
-var amt1 = "1000000";
-var amt2 = "1,000,000";
-var amt3 = "900k";
-var amt4 = "1m";
-var amt5 = "1 mil";
-var amt6 = "900 000";
+var user = "tigle";
 
-var num1 = getNum(amt1);
-var num2 = getNum(amt2);
-var num3 = getNum(amt3);
-var num4 = getNum(amt4);
-var num5 = getNum(amt5);
-var num6 = getNum(amt6);
-var total = num1 + num2 + num3 + num4 + num5 + num6;
-console.log(total.toLocaleString());
+    console.log("getting zetas for " + user);
+    var userURL = 'https://swgoh.gg/u/' + user;
 
-function getNum(currentValue) {
-    var total = 0;
-    var content = currentValue.toString().replace(/,/g, "").replace(/\s/g, "");
-    try {
-        if (content.endsWith("k")) {
-            console.log("thousand");
-            var amount = parseInt(content.substring(0, content.length - 1).trim()) * 1000;
-            total += amount;
+    var request = require('request');
+    var cheerio = require('cheerio');
+    request(userURL, function (error, response, body) {
+        if (!error) {
+            var $ = cheerio.load(body);
+            var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
+            guildURL = "https://swgoh.gg" + guildURL + "?stats=zetas";
+            getZeta(guildURL, function(data) {
+                console.log(data);
+            });
         }
-        else if (content.endsWith("m")) {
-            console.log("mil 1");
-            var amount = parseInt(content.substring(0, content.length - 1).trim()) * 1000000;
-            total += amount;
-        }
-        else if (content.endsWith("mil")) {
-            console.log("mil 2");
-            var amount = parseInt(content.substring(0, content.length - 3).trim()) * 1000000;
-            total += amount;
-        }
-        else {
-            console.log("normal");
-            var amount = parseInt(content);
-            total += amount;
-        }
-    } catch (e) {
-        console.log("Couldn't parse " + content);
+    });
+
+    function getZeta(guildURL, callback) {
+        var request = require('request');
+        var cheerio = require('cheerio');
+        request(guildURL , function (error, response, body) {
+            if (!error) {
+                var $ = cheerio.load(body);
+                var numUsers = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody").html();
+                numUsers = numUsers.split("<tr>");
+                for (var i = 0; i < (numUsers.length - 1); i++) {
+                    var username = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a").attr("href");
+                    if (username == `/u/${user}/`) {
+                        var data = {};
+                        var numTotalZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td.text-center").html();
+                        data.num = numTotalZetas;
+                        var chars = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3)").html();
+                        chars = chars.split("<div class=\"guild-member-zeta\">");
+                        data.zetas = [];
+                        for (var k = 0; k < (chars.length - 1); k++) {
+                            var char = {};
+                            var name = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-character > div").attr("title");
+                            char.name = name;
+                            var numZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-abilities").html();
+                            numZetas = numZetas.split("<img class=\"guild-member-zeta-ability\"");
+                            char.zetas = [];
+                            for (var j = 0; j < (numZetas.length - 1); j++) {
+                                var zeta = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3) > div:nth-child(" + (k + 1) + ") > div.guild-member-zeta-abilities > img:nth-child(" + (j + 1) + ")").attr("title");
+                                char.zetas.push(zeta);
+                            }
+                            data.zetas.push(char);
+                        }
+                        console.log(JSON.stringify(data));
+                        break;
+                    }
+                }
+            }
+        });
     }
-    console.log("value(" + currentValue + "): " + total);
-    return total;
-}
