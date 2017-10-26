@@ -41,6 +41,7 @@ client.on("messageDelete", (message) => {
             }, 2000);
         });
     }
+});
 
 client.on("message", (message) => {
     if (message.author.bot) return;
