@@ -9,6 +9,39 @@ client.on("ready", () => {
     client.user.setUsername("Samaritan");
 });
 
+client.on("messageUpdate", (message) => {
+    console.log("updated message");
+    // console.log(message);
+    if (message.author.bot) return;
+    var config = require("./Config/config.json");
+    if (message.channel.name == config.tbRecords) {
+        console.log("updated message detected in tb records channel");
+        message.channel.send("Recalculating gp totals")
+        .then(sentMessage => {
+            setTimeout(function() {
+                sentMessage.delete();
+                recalculateGP(message);
+            }, 2000);
+        });
+    }
+});
+
+client.on("messageDelete", (message) => {
+    console.log("deleted message");
+    // console.log(message);
+    if (message.author.bot) return;
+    var config = require("./Config/config.json");
+    if (message.channel.name == config.tbRecords) {
+        console.log("deleted message detected in tb records channel");
+        message.channel.send("Recalculating gp totals")
+        .then(sentMessage => {
+            setTimeout(function() {
+                sentMessage.delete();
+                recalculateGP(message);
+            }, 2000);
+        });
+    }
+
 client.on("message", (message) => {
     if (message.author.bot) return;
     var config = require("./Config/config.json");
@@ -601,6 +634,96 @@ client.on("message", (message) => {
 });
 
 client.login(auth.token);
+
+function recalculateGP(message) {
+    var config = require("./Config/config.json");
+    var channel = message.guild.channels.find("name", config.tbRecords);
+
+    var allMessages = [];
+    fetchMessages(message.channel, allMessages, null, function(totalMessages){
+        totalMessages = totalMessages.sort(function(a, b) {
+            return a.createdTimestamp - b.createdTimestamp;
+        });
+        var lastMessageWasABot = true;
+        var lastMessageValue = false;
+        var total = 0;
+        var amount = 0;
+        var num = 0;
+        totalMessages.forEach(
+            function(currentValue, currentIndex, listObj) {
+                // console.log(currentValue.content);
+                // console.log("lastMessageWasABot: " + lastMessageWasABot);
+                // console.log();
+                if (currentValue == message) {
+                    // console.log("encountered same message as deleted message");
+                    return;
+                }
+                if (lastMessageWasABot && currentValue.author.bot) {
+                    // console.log("encountered 2nd message from bot meaning a record was deleted");
+                    currentValue.delete();
+                    lastMessageWasABot = currentValue.author.bot;
+                    return;
+                }
+                if (lastMessageWasABot && !currentValue.author.bot) {
+                    // console.log("last message was a bot and this one isn't meaning its a player record");
+                    amount = getNum(currentValue);
+                    if (amount.toString() !== "NaN") {
+                        total += amount;
+                    }
+                    num += 1;
+                }
+                if (!lastMessageWasABot && currentValue.author.bot) {
+                    // console.log("last message was a person and this one is a bot meaning assign the new value");
+                    currentValue.edit(`${num}) ${total.toLocaleString()} GP available`);
+                }
+                lastMessageWasABot = currentValue.author.bot;
+            }
+        );
+        // console.log(totalMessages[0]);
+    });
+}
+
+function fetchMessages(channel, allMessages, lastMessageID, callback) {
+    var pageMessages = [];
+    if (lastMessageID == null) {
+        channel.fetchMessages({
+            limit: 100,
+        }).then((messages) => {
+            console.log("messages.size: " + messages.size);
+            messages.forEach(
+                function(currentValue, currentIndex, listObj) {
+                    // console.log(currentValue.id + " at " + new Date(currentValue.createdTimestamp));
+                    pageMessages.push(currentValue);
+                }
+            );
+            allMessages = allMessages.concat(pageMessages);
+            if (pageMessages.length == 100) {
+                fetchMessages(channel, allMessages, pageMessages[99].id, callback);
+            } else {
+                callback(allMessages);
+            }
+        });
+    } else {
+        channel.fetchMessages({
+            limit: 100,
+            before: lastMessageID
+        }).then((messages) => {
+            console.log("messages.size: " + messages.size);
+            messages.forEach(
+                function(currentValue, currentIndex, listObj) {
+                    // console.log("675 " + currentValue.id + " at " + new Date(currentValue.createdTimestamp));
+                    pageMessages.push(currentValue);
+                }
+            );
+            allMessages = allMessages.concat(pageMessages);
+            if (pageMessages.length == 100) {
+                fetchMessages(channel, allMessages, pageMessages[0].id, callback);
+            } else {
+                callback(allMessages);
+            }
+        });
+    } // end else
+}
 
 function calculateGP(message) {
     var config = require("./Config/config.json");
