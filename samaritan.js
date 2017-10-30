@@ -53,6 +53,16 @@ client.on("message", (message) => {
     } catch (error) {
         console.log(error);
     }
+    if (message.content.toLowerCase() === "lol") {
+        message.channel.send("LOLOLOLOLOL! Hilarious...")
+        .then(sentMessage => {
+            setTimeout( function() {
+                sentMessage.delete();
+            }, 2000);
+            message.react("😆");
+            message.react("😂");
+        });
+    }
     if (message.channel.name == config.tbRecords) {
         var content = message.content.toString().replace(/,/g, "").replace(/\s/g, "");
         var amount = getNum(message);
@@ -121,7 +131,7 @@ client.on("message", (message) => {
                 if (doesHeHaveThePower) {
                     message.channel.send('Are you sure? Answer yes or no')
                     .then(sentMessage => {
-                        message.channel.awaitMessages(response => (response.content === 'yes' || response.content === 'no'), {
+                        message.channel.awaitMessages(response => (response.content.toLowerCase() === 'yes' || response.content.toLowerCase() === 'no'), {
                             max: 1,
                             time: 30000,
                             errors: ['time'],
