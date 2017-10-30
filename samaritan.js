@@ -41,6 +41,12 @@ client.on("messageDelete", (message) => {
             }, 2000);
         });
     }
+    else {
+        message.channel.send("You deleted a message! Are you trying to hide something?..")
+        .then(sentMessage => {
+            sentMessage.delete();
+        });
+    }
 });
 
 client.on("message", (message) => {
@@ -315,6 +321,7 @@ client.on("message", (message) => {
                 .then(sentMessage => {
                     getInfo(args[0], args[1], function (data) {
                         sentMessage.delete();
+                        const gear = message.guild.emojis.find("name", "gear" + data.gear);
                         message.channel.send({
                             embed: {
                                 author: {
@@ -327,7 +334,7 @@ client.on("message", (message) => {
                                 fields: [
                                     {
                                         name: "Info",
-                                        value: `Lvl ${data.level} ${data.stars}:star: ${data.gear}.`,
+                                        value: "Lvl " + data.level + " " + data.stars + config.emoji.star + " " + gear,
                                         inline: true
                                     },
                                     {
@@ -533,9 +540,10 @@ client.on("message", (message) => {
                             }
                         );
                         var fields = [];
+                        const gear = message.guild.emojis.find("name", "gear" + data[i].data.gear);
                         for (var i = 0; i < data.length; i++) {
                             var field = {
-                                name: data[i].data.stars + ":star: " + data[i].data.gear + " " + data[i].name,
+                                name: data[i].data.stars + config.emoji.star + " " + gear + " " + data[i].name,
                                 value: data[i].data.speed + " Speed\n" + data[i].data.health + " Health\n" + data[i].data.protection + " Protection",
                                 inline: true
                             };
@@ -1153,94 +1161,12 @@ function getShipSkills(user, ship, callback) {
 }
 function getInfo(user, char, callback) {
     console.log("getting info for " + char + " on profile " + user);
-    var url = 'https://swgoh.gg/u/' + user + '/collection/' + char + '/';
-
-    var request = require('request');
-    var cheerio = require('cheerio');
-
-    request(url, function (error, response, body) {
-      if (!error) {
-        var $ = cheerio.load(body);
-
-        var health = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").html();
-        var protection = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(2) > .pc-stat-value").html();
-        var speed = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(3) > .pc-stat-value").html();
-        var crit_damage = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(4) > .pc-stat-value").html();
-        var potency = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(5) > .pc-stat-value").html();
-        var tenacity = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(6) > .pc-stat-value").html();
-        var basic_damage = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(4) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").html();
-        var basic_crit_chance = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(4) > .media-body > .media-body > .pc-stat:nth-child(2) > .pc-stat-value").html();
-        var special_damage = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(6) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").html();
-        var special_crit_chance = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(6) > .media-body > .media-body > .pc-stat:nth-child(2) > .pc-stat-value").html();
-        var level = $(".char-portrait-full-level").html();
-        var stars = $(".star-inactive").toString();
-        if (stars == "") {
-            stars = "7"
-        } else {
-            num = stars.split("inactive");
-            stars = 7 - (num.length - 1);
-        }
-        var gear = $(".pc-heading").html();
-        var gearLevel = 0;
-        if (gear == "XII") {
-            gearLevel = 12;
-        }
-        if (gear == "XI") {
-            gearLevel = 11;
-        }
-        if (gear == "X") {
-            gearLevel = 10;
-        }
-        if (gear == "IX") {
-            gearLevel = 9;
-        }
-        if (gear == "VIII") {
-            gearLevel = 8;
-        }
-        if (gear == "VII") {
-            gearLevel = 7;
-        }
-        if (gear == "VI") {
-            gearLevel = 6;
-        }
-        if (gear == "V") {
-            gearLevel = 5;
-        }
-        if (gear == "IV") {
-            gearLevel = 4;
-        }
-        if (gear == "II") {
-            gearLevel = 3;
-        }
-        if (gear == "II") {
-            gearLevel = 2;
-        }
-        if (gear == "I") {
-            gearLevel = 1;
-        }
-        var data = {
-            "level": level,
-            "stars": stars,
-            "gear": "G" + gearLevel,
-            "health": health,
-            "protection": protection,
-            "speed": speed,
-            "potency": potency,
-            "tenacity": tenacity,
-            "crit_damage": crit_damage,
-            "basic_crit_chance": basic_crit_chance,
-            "special_crit_chance": special_crit_chance,
-            "basic_damage": basic_damage,
-            "special_damage": special_damage,
-        };
-        callback(data);
-      } else {
-        console.log("We’ve encountered an error: " + error);
-      }
-    });
+    var url = '/u/' + user + '/collection/' + char + '/';
+    getStats(url, callback);
 }
 
 function getStats(url, callback) {
+    var config = require("./Config/config.json");
     var url = 'https://swgoh.gg' + url;
 
     var request = require('request');
@@ -1270,46 +1196,11 @@ function getStats(url, callback) {
         }
         var gear = $(".pc-heading").html();
         var gearLevel = 0;
-        if (gear == "XII") {
-            gearLevel = 12;
-        }
-        if (gear == "XI") {
-            gearLevel = 11;
-        }
-        if (gear == "X") {
-            gearLevel = 10;
-        }
-        if (gear == "IX") {
-            gearLevel = 9;
-        }
-        if (gear == "VIII") {
-            gearLevel = 8;
-        }
-        if (gear == "VII") {
-            gearLevel = 7;
-        }
-        if (gear == "VI") {
-            gearLevel = 6;
-        }
-        if (gear == "V") {
-            gearLevel = 5;
-        }
-        if (gear == "IV") {
-            gearLevel = 4;
-        }
-        if (gear == "II") {
-            gearLevel = 3;
-        }
-        if (gear == "II") {
-            gearLevel = 2;
-        }
-        if (gear == "I") {
-            gearLevel = 1;
-        }
+        var gearLevel = config.gears[gear];
         var data = {
             "level": level,
             "stars": stars,
-            "gear": "G" + gearLevel,
+            "gear": gearLevel,
             "health": health,
             "protection": protection,
             "speed": speed,

@@ -1,22 +1,37 @@
 {
     "commandPrefix": "{COMMAND_PREFIX}",
     "tbRecords": "{TB_RECORDS_CHANNEL_NAME}",
+    "gears": {
+        "I": "1",
+        "II": "2",
+        "III": "3",
+        "IV": "4",
+        "V": "5",
+        "VI": "6",
+        "VII": "7",
+        "VIII": "8",
+        "IX": "9",
+        "X": "10",
+        "XI": "11",
+        "XII": "12"
+    },
     "emoji": {
-        "worker": ":construction_worker:",
-        "construction": ":construction:",
-        "gear": ":gear:",
-        "star": ":star:",
-        "thumbsUp": ":thumbsup:",
-        "disappointed": ":disappointed:",
-        "slightSmile": ":slight_smile:",
-        "angry": ":angry:",
-        "shrug": ":shrug:",
-        "timer": ":timer:",
+        "worker": "👷",
+        "construction": "🚧",
+        "star": "⭐",
+        "thumbsUp": "👍",
+        "disappointed": "😞",
+        "slightSmile": "🙂",
+        "laughing": "😆",
+        "joy": "😂",
+        "angry": "😠",
+        "shrug": "🤷",
+        "timer": "⏲",
         "faces": [
-            ":grinning:",
-            ":kissing_heart:",
-            ":grinning:",
-            ":wink:"
+            "😀",
+            "😘",
+            "😀",
+            "😉"
         ]
     }
 }
