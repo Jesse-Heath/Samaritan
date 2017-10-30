@@ -540,8 +540,8 @@ client.on("message", (message) => {
                             }
                         );
                         var fields = [];
-                        const gear = message.guild.emojis.find("name", "gear" + data[i].data.gear);
                         for (var i = 0; i < data.length; i++) {
+                        const gear = message.guild.emojis.find("name", "gear" + data[i].data.gear);
                             var field = {
                                 name: data[i].data.stars + config.emoji.star + " " + gear + " " + data[i].name,
                                 value: data[i].data.speed + " Speed\n" + data[i].data.health + " Health\n" + data[i].data.protection + " Protection",
