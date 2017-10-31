@@ -41,12 +41,12 @@ client.on("messageDelete", (message) => {
             }, 2000);
         });
     }
-    else {
-        message.channel.send("You deleted a message! Are you trying to hide something?..")
-        .then(sentMessage => {
-            sentMessage.delete();
-        });
-    }
+    // else {
+    //     message.channel.send("You deleted a message! Are you trying to hide something?..")
+    //     .then(sentMessage => {
+    //         sentMessage.delete();
+    //     });
+    // }
 });
 
 client.on("message", (message) => {
@@ -541,7 +541,7 @@ client.on("message", (message) => {
                         );
                         var fields = [];
                         for (var i = 0; i < data.length; i++) {
-                        const gear = message.guild.emojis.find("name", "gear" + data[i].data.gear);
+                            const gear = message.guild.emojis.find("name", "gear" + data[i].data.gear);
                             var field = {
                                 name: data[i].data.stars + config.emoji.star + " " + gear + " " + data[i].name,
                                 value: data[i].data.speed + " Speed\n" + data[i].data.health + " Health\n" + data[i].data.protection + " Protection",
