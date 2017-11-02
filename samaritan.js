@@ -500,7 +500,7 @@ client.on("message", (message) => {
                     sendSwgohNameError(message);
                 }
                 break;
-            case "gearNeeded":
+            case "gearneeded":
                 console.log("gear command triggered");
                 var swgohName = getSwgohName(message);
                 console.log(swgohName);
@@ -657,7 +657,7 @@ client.on("message", (message) => {
                     sendSwgohNameError(message);
                 }
                 break;
-            case "shipSkills":
+            case "shipskills":
                 console.log("skills command triggered");
                 var swgohName = getSwgohName(message);
                 console.log(swgohName);
@@ -713,7 +713,7 @@ client.on("message", (message) => {
                     sendSwgohNameError(message);
                 }
                 break;
-            case "shipFaction":
+            case "shipfaction":
                 console.log("ship faction command triggered");
                 var swgohName = getSwgohName(message);
                 console.log(swgohName);
