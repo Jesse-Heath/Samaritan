@@ -110,20 +110,145 @@ client.on("message", (message) => {
                 if (message.mentions.users.first() === undefined) {
                     users[message.author.id] = args.shift();
                 } else {
-                    if (args[0].startsWith("<@") && args[0].endsWith(">")) {
-                        args.shift();
-                        users[message.mentions.users.first().id] = args.shift();
+                    var doesHeHaveThePower = false;
+                    message.member.roles.forEach(
+                        function(role, currentIndex, listObj) {
+                            if (role.name === "Officers" || role.name === "admin") {
+                                doesHeHaveThePower = true;
+                            }
+                        }
+                    );
+                    if (doesHeHaveThePower) {
+                        if (args[0].startsWith("<@") && args[0].endsWith(">")) {
+                            args.shift();
+                            users[message.mentions.users.first().id] = args.shift();
+                        } else {
+                            users[message.mentions.users.first().id] = args.shift();
+                        }
                     } else {
-                        users[message.mentions.users.first().id] = args.shift();
+                        message.channel.send("Sorry, but you don't have the access to add users for other people")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
                     }
                 }
                 fs.writeFile("./Config/users.json", JSON.stringify(users, null, 4), "utf8", function(err, data) {
                     if (err) {
-                        message.channel.send("Whoops, i couldn't add your user");
+                        message.channel.send("Whoops, i couldn't add your user")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
                     } else {
-                        message.channel.send("Successfully added user");
+                        message.channel.send("Successfully added user")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
                     }
                 });
+                break;
+            case "removeuser":
+                console.log("remove user command triggered");
+                var fs = require("fs");
+                var users = require("./Config/users.json");
+                if (message.mentions.users.first() === undefined) {
+                    delete users[message.author.id];
+                } else {
+                    var doesHeHaveThePower = false;
+                    message.member.roles.forEach(
+                        function(role, currentIndex, listObj) {
+                            if (role.name === "Officers" || role.name === "admin") {
+                                doesHeHaveThePower = true;
+                            }
+                        }
+                    );
+                    if (doesHeHaveThePower) {
+                        delete users[message.mentions.users.first().id];
+                    } else {
+                        message.channel.send("Sorry, but you don't have the access to add users for other people")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
+                    }
+                }
+                fs.writeFile("./Config/users.json", JSON.stringify(users, null, 4), "utf8", function(err, data) {
+                    if (err) {
+                        message.channel.send("Whoops, i couldn't remove your user")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
+                    } else {
+                        message.channel.send("Successfully removed user")
+                        .then(sentMessage => {
+                            setTimeout(
+                                function () {
+                                    sentMessage.delete();
+                                },
+                                3000
+                            );
+                        });
+                    }
+                });
+                break;
+            case "listusers":
+                console.log("list users command triggered");
+                var fs = require("fs");
+                var users = require("./Config/users.json");
+                var doesHeHaveThePower = false;
+                message.member.roles.forEach(
+                    function(role, currentIndex, listObj) {
+                        if (role.name === "Officers" || role.name === "admin") {
+                            doesHeHaveThePower = true;
+                        }
+                    }
+                );
+                if (doesHeHaveThePower) {
+                    var list = "";
+                    for (var userId in users) {
+                        var username;
+                        if (message.channel.guild.members.get(userId).nickname === null) {
+                            username = message.channel.guild.members.get(userId).user.username;
+                        } else {
+                            username = message.channel.guild.members.get(userId).nickname;
+                        }
+                        list += `${username} has swgoh name: ${users[userId]}\n`;
+                    }
+                    message.channel.send(list);
+                } else {
+                    message.channel.send("Sorry, but you don't have the access to list users")
+                    .then(sentMessage => {
+                        setTimeout(
+                            function () {
+                                sentMessage.delete();
+                            },
+                            3000
+                        );
+                    });
+                }
                 break;
             case "time":
                 console.log("time command triggered");
