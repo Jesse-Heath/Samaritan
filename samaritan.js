@@ -756,7 +756,7 @@ client.on("message", (message) => {
                                 fields.push(field);
                             };
                             setTimeout( function() {
-                                var rankState = data.currentRank < data.averageRank;
+                                var rankState = parseInt(data.currentRank) < parseInt(data.averageRank);
                                 message.channel.send({
                                     embed: {
                                         author: {
