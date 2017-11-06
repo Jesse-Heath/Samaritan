@@ -108,7 +108,7 @@ client.on("message", (message) => {
                 var fs = require("fs");
                 var users = require("./Config/users.json");
                 if (message.mentions.users.first() === undefined) {
-                    users[message.author.id] = args.shift();
+                    users[message.author.id] = encodeURI(args.join(" "));
                 } else {
                     var doesHeHaveThePower = false;
                     message.member.roles.forEach(
@@ -119,11 +119,12 @@ client.on("message", (message) => {
                         }
                     );
                     if (doesHeHaveThePower) {
+                        var name = args.join(" ").replace(/<.*>/g, "").trim();
                         if (args[0].startsWith("<@") && args[0].endsWith(">")) {
                             args.shift();
-                            users[message.mentions.users.first().id] = args.shift();
+                            users[message.mentions.users.first().id] = encodeURI(name);
                         } else {
-                            users[message.mentions.users.first().id] = args.shift();
+                            users[message.mentions.users.first().id] = encodeURI(name);
                         }
                     } else {
                         message.channel.send("Sorry, but you don't have the access to add users for other people")
@@ -235,7 +236,7 @@ client.on("message", (message) => {
                         } else {
                             username = message.channel.guild.members.get(userId).nickname;
                         }
-                        list += `${username} has swgoh name: ${users[userId]}\n`;
+                        list += `${username} has swgoh name: ${decodeURI(users[userId])}\n`;
                     }
                     message.channel.send(list);
                 } else {
@@ -884,9 +885,9 @@ function getSwgohName(message) {
     var users = require("./Config/users.json");
     var swgohName;
     if (message.mentions.users.first() !== undefined) {
-        swgohName = users[message.mentions.users.first().id];
+        swgohName = decodeURI(users[message.mentions.users.first().id]);
     } else if (users.hasOwnProperty(message.author.id)) {
-        swgohName = users[message.author.id];
+        swgohName = decodeURI(users[message.author.id]);
     } else {
         swgohName = false;
     }
