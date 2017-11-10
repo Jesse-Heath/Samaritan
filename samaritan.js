@@ -93,15 +93,97 @@ client.on("message", (message) => {
         const command = args.shift().toLowerCase();
 
         switch(command) {
-            case "everyone":
-                console.log("everyone command triggered");
-                message.channel.send("Hi @ everyone")
-                    .then(sentMessage => {
-                        setTimeout(function() {
-                            sentMessage.delete();
-                        },
-                        2000);
+            case "events":
+                console.log("events command triggered");
+                message.channel.send("Forecasting the future like a boss...")
+                .then(sentMessage => {
+                    getSwgohEvents(function(data) {
+                        var fields = [];
+                        var list = {};
+
+                        for (var i = 0; i < data.length; i++) {
+                            if (list[data[i].date] == undefined) {
+                                list[data[i].date] = [];
+                            }
+                            list[data[i].date].push(data[i]);
+                        }
+
+                        var keys = [];
+                        for (var date in list) {
+                            if (list.hasOwnProperty(date)) {
+                                keys.push(date);
+                            }
+                        }
+                        keys.sort();
+
+                        for (var j = 0; j < keys.length; j++) {
+                            var date = keys[j];
+                            var events = "";
+                            for (var i = 0; i < list[date].length; i++) {
+                                events += list[date][i].name + " (" + list[date][i].state + ")\n";
+                            }
+                            var field = {
+                                name: "Events On " + date,
+                                value: events,
+                                inline: true
+                            };
+                            fields.push(field);
+                        }
+                        message.channel.send({
+                            embed: {
+                                author: {
+                                  name: client.user.username,
+                                  icon_url: client.user.avatarURL
+                                },
+                                title: "Future SWGOH Events",
+                                fields: fields,
+                                timestamp: new Date(),
+                                footer: {
+                                  icon_url: client.user.avatarURL,
+                                  text: ""
+                                }
+                            }
+                        });
+                        sentMessage.delete();
                     });
+                });
+                break;
+            case "gp":
+                console.log("gp command triggered");
+                message.channel.send("Sure thing")
+                .then(sentMessage => {
+                    var swgohName = getSwgohName(message);
+                    if (swgohName) {
+                        getGp(swgohName, function(data) {
+                            message.channel.send(`Your Character GP: ${data.characterGp}\nYour Ships GP: ${data.shipGp}\nTotal GP: ${data.totalGp}`);
+                        });
+                    } else {
+                        sendSwgohNameError(message);
+                    }
+                    sentMessage.delete();
+                });
+                break;
+            case "tbgp":
+                console.log("tbgp command triggered");
+                message.channel.send("Calculating the fate of the universe...")
+                .then(sentMessage => {
+                    var swgohName = getSwgohName(message);
+                    if (swgohName) {
+                        getGp(swgohName, function(data) {
+                        sentMessage.delete();
+                            var totalCharGP = parseInt(data.characterGp.replace(/,/g, "")) * 6;
+                            var totalShipGP = parseInt(data.shipGp.replace(/,/g, "")) * 4;
+                            var totalGP = parseInt(totalCharGP) + parseInt(totalShipGP);
+                            totalCharGP = totalCharGP.toLocaleString();
+                            totalShipGP = totalShipGP.toLocaleString();
+                            totalGP = totalGP.toLocaleString();
+                            message.channel.send(`Total Character GP: ${totalCharGP}\nTotal Ships GP: ${totalShipGP}\nTotal GP: ${totalGP}`);
+                        });
+                    } else {
+                        sentMessage.delete();
+                        sendSwgohNameError(message);
+                    }
+                });
                 break;
             case "adduser":
                 console.log("add user command triggered");
@@ -368,26 +450,40 @@ client.on("message", (message) => {
                 break;
             case "help":
                 console.log("help command triggered");
-                var content = `Hello <@${message.author.id}>. Here's my available commands so far:\n`;
-                    content += `\n\t\t${config.commandPrefix}**help** - This list.`;
-                    content += `\n\t\t${config.commandPrefix}**everyone** - Calls everyone.`;
-                    content += `\n\t\t${config.commandPrefix}**remind** *(how many times)* *(how many minutes to wait inbetween)* *channel* *message* - Takes the message you typed and sends it back to the channel later. If you mention a channel it sends the message there instead`;
-                    content += `\n\t\t${config.commandPrefix}**meta** - Gets pictures of the current meta report.`;
-                    content += `\n\t\t${config.commandPrefix}**link** - Gets your swgoh.gg link.`;
-                    content += `\n\t\t${config.commandPrefix}**mods** *character* - Gets a picture of your current mods on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**info** *character* - Gives you important info on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**zeta** - Gives you a list of all the zetas you have.`;
-                    content += `\n\t\t${config.commandPrefix}**gear** *character* - Gets a picture of the gear level on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**gearNeeded** *character* - Gets a picture of the gear needed to get to the next level on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**skills** *character* - Gets you the ability levels on a character.`;
-                    content += `\n\t\t${config.commandPrefix}**faction** *faction* - Gets a picture of all characters for a faction.`;
-                    content += `\n\t\t${config.commandPrefix}**arena** - Gets a picture of your arena team.`;
-                    content += `\n\t\t${config.commandPrefix}**shipSkills** *ship* - Gets a picture of the ability levels on a ship.`;
-                    content += `\n\t\t${config.commandPrefix}**shipFaction** *faction* - Gets a picture of all ships for a faction.`;
-                    content += `\n${config.emoji.construction} ${config.commandPrefix}**guild-info** *character* - Gives you a list of how many people have a certain character at different star and gear level`;
-                    content += `\n${config.emoji.construction} ${config.commandPrefix}**guild-list** *character* *gear/star* *level* - Gives you a list of who has a certain character at certain star or gear level`;
-                    content += `\n\nThat's all folks!`;
-                message.channel.send(content);
+                var helpCommand = args.shift();
+                switch (message.content.toLowerCase()) {
+                    case "-help admin":
+                        var content = `Hello <@${message.author.id}>. Here's my admin available commands so far:\n`;
+                            content += `\n\t\t${config.commandPrefix}**help** **Admin**- This list. Only people with admin or botadmin roles can run these commands.`;
+                            content += `\n\t\t${config.commandPrefix}**addUser** - *(your swgoh name)* - If you mention someone in this message, it will assign the name to them.`;
+                            content += `\n\t\t${config.commandPrefix}**removeUser** - Removes your swgoh name from the bot. If you mention someone it will remove their name.`;
+                            content += `\n\t\t${config.commandPrefix}**listUsers** - Lists all users swgoh names that the bot has.`;
+                            content += `\n\t\t${config.commandPrefix}**purge** - Purges the TB records channel.`;
+                        message.channel.send(content);
+                        break;
+                    default:
+                        var content = `Hello <@${message.author.id}>. Here's my available commands so far:\n`;
+                            content += `\n\t\t${config.commandPrefix}**help** - This list.`;
+                            content += `\n\t\t${config.commandPrefix}**time** - A ticking clock.`;
+                            content += `\n\t\t${config.commandPrefix}**face** - A moving face emoji.`;
+                            content += `\n\t\t${config.commandPrefix}**remind** *(how many times)* *(how many minutes to wait inbetween)* *channel* *message* - Takes the message you typed and sends it back to the channel later. If you mention a channel it sends the message there instead`;
+                            content += `\n\t\t${config.commandPrefix}**meta** - Gets pictures of the current meta report.`;
+                            content += `\n\t\t${config.commandPrefix}**link** - Gets your swgoh.gg link.`;
+                            content += `\n\t\t${config.commandPrefix}**mods** *character* - Gets a picture of your current mods on a character.`;
+                            content += `\n\t\t${config.commandPrefix}**info** *character* - Gives you important info on a character.`;
+                            content += `\n\t\t${config.commandPrefix}**zeta** - Gives you a list of all the zetas you have.`;
+                            content += `\n\t\t${config.commandPrefix}**gear** *character* - Gets a picture of the gear level on a character.`;
+                            content += `\n\t\t${config.commandPrefix}**gearNeeded** *character* - Gets a picture of the gear needed to get to the next level on a character.`;
+                            content += `\n\t\t${config.commandPrefix}**skills** *character* - Gets you the ability levels on a character.`;
+                            content += `\n\t\t${config.commandPrefix}**faction** *faction* - Gets a picture of all characters for a faction.`;
+                            content += `\n\t\t${config.commandPrefix}**arena** - Gets a picture of your arena team.`;
+                            content += `\n\t\t${config.commandPrefix}**shipSkills** *ship* - Gets a picture of the ability levels on a ship.`;
+                            content += `\n\t\t${config.commandPrefix}**shipFaction** *faction* - Gets a picture of all ships for a faction.`;
+                            content += `\n${config.emoji.construction} ${config.commandPrefix}**guild-info** *character* - Gives you a list of how many people have a certain character at different star and gear level`;
+                            content += `\n${config.emoji.construction} ${config.commandPrefix}**guild-list** *character* *gear/star* *level* - Gives you a list of who has a certain character at certain star or gear level`;
+                            content += `\n\nThat's all folks!`;
+                        message.channel.send(content);
+                }
                 break;
             case "zeta":
                 console.log("zeta command triggered");
@@ -892,6 +988,73 @@ function getSwgohName(message) {
         swgohName = false;
     }
     return swgohName;
+}
+
+function getSwgohEvents(callback) {
+    console.log("Getting upcoming swgoh events");
+    var url = "http://swgohevents.com/";
+
+    var request = require('request');
+    var cheerio = require('cheerio');
+
+    request(url, function (error, response, body) {
+      if (!error) {
+        var $ = cheerio.load(body);
+        var data = [];
+        var decode = require('decode-html');
+        var eventsList = $("body > div > div > div.events").find(".event");
+
+        for (var i = 0; i < eventsList.length; i++) {
+            var events = eventsList;
+            for (var j = 0; j < i; j++) {
+                events = events.next();
+            }
+            var event = {};
+            event.name = decode(events.children(".event_name").children("a").html());
+            event.date = events.children(".event_details").children("span").html();
+            event.state = "Unknown";
+            event.state = events.children(".event_details").children("span").attr("class");
+            event.details = events.children(".event_details").text();
+            event.details = event.details.replace(/\n/g, "").trim();
+            if (event.date == null) {
+                event.date = "Unknown";
+            }
+            if (event.state == null) {
+                event.state = "Unknown";
+            }
+            data.push(event);
+        }
+        callback(data);
+      } else {
+        console.log("We’ve encountered an error: " + error);
+      }
+    });
+}
+
+function getGp(user, callback) {
+    console.log("getting gp for " + user );
+    var url = 'https://swgoh.gg/u/' + user;
+    console.log("start");
+
+    var request = require('request');
+    var cheerio = require('cheerio');
+
+    request(url, function (error, response, body) {
+      if (!error) {
+        var $ = cheerio.load(body);
+        var data = {};
+        var decode = require('decode-html');
+        var characterGp = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div:nth-child(4) > div > div > p:nth-child(3) > strong").html();
+        var shipGp = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div:nth-child(4) > div > div > p:nth-child(4) > strong").html();
+        var totalGp = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div:nth-child(4) > div > div > p:nth-child(2) > strong").html();
+        data.characterGp = characterGp;
+        data.shipGp = shipGp;
+        data.totalGp = totalGp;
+        callback(data);
+      } else {
+        console.log("We’ve encountered an error: " + error);
+      }
+    });
 }
 
 function recalculateGP(message) {
