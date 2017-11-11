@@ -149,7 +149,6 @@ client.on("message", (message) => {
                                 if (args.length !== 0) {
                                     var addThisOne = false;
                                     for (var k = 0; k < args.length; k++) {
-                                        console.log(list[date][i].name.toLowerCase() + " contains " + args[k] + "? " + list[date][i].name.toLowerCase().indexOf(args[k]));
                                         if (list[date][i].name.toLowerCase().indexOf(args[k]) !== -1) {
                                             if (addThisOne == false) {
                                                 addThisOne = true;
