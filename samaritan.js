@@ -116,11 +116,55 @@ client.on("message", (message) => {
                         }
                         keys.sort();
 
+                        var confirmedOnly = args.indexOf("-confirmed") === -1 ? false : true;
+                        var estimatedOnly = args.indexOf("-estimated") === -1 ? false : true;
+                        var unknownOnly = args.indexOf("-unknown") === -1 ? false : true;
+
+                        if (confirmedOnly) {
+                            args.splice(args.indexOf("-confirmed"), 1);
+                        }
+
+                        if (estimatedOnly) {
+                            args.splice(args.indexOf("-estimated"), 1);
+                        }
+
+                        if (unknownOnly) {
+                            args.splice(args.indexOf("-unknown"), 1);
+                        }
+
                         for (var j = 0; j < keys.length; j++) {
                             var date = keys[j];
                             var events = "";
                             for (var i = 0; i < list[date].length; i++) {
-                                events += list[date][i].name + " (" + list[date][i].state + ")\n";
+                                if (confirmedOnly && list[date][i].state.toLowerCase() !== "confirmed") {
+                                    continue;
+                                }
+                                if (estimatedOnly && list[date][i].state.toLowerCase() !== "estimated") {
+                                    continue;
+                                }
+                                if (unknownOnly && list[date][i].state.toLowerCase() !== "unknown") {
+                                    continue;
+                                }
+
+                                if (args.length !== 0) {
+                                    var addThisOne = false;
+                                    for (var k = 0; k < args.length; k++) {
+                                        console.log(list[date][i].name.toLowerCase() + " contains " + args[k] + "? " + list[date][i].name.toLowerCase().indexOf(args[k]));
+                                        if (list[date][i].name.toLowerCase().indexOf(args[k]) !== -1) {
+                                            if (addThisOne == false) {
+                                                addThisOne = true;
+                                            }
+                                        }
+                                    }
+                                    if (addThisOne) {
+                                        events += list[date][i].name + " (" + list[date][i].state + ")\n";
+                                    }
+                                } else {
+                                    events += list[date][i].name + " (" + list[date][i].state + ")\n";
+                                }
+                            }
+                            if (events === "") {
+                                continue;
                             }
                             var field = {
                                 name: "Events On " + date,
@@ -129,22 +173,26 @@ client.on("message", (message) => {
                             };
                             fields.push(field);
                         }
-                        message.channel.send({
-                            embed: {
-                                author: {
-                                  name: client.user.username,
-                                  icon_url: client.user.avatarURL
-                                },
-                                title: "Future SWGOH Events",
-                                fields: fields,
-                                timestamp: new Date(),
-                                footer: {
-                                  icon_url: client.user.avatarURL,
-                                  text: ""
+                        if (fields.length === 0) {
+                            message.channel.send("No events matching the search terms unfortunately");
+                        } else {
+                            message.channel.send({
+                                embed: {
+                                    author: {
+                                      name: client.user.username,
+                                      icon_url: client.user.avatarURL
+                                    },
+                                    title: "Future SWGOH Events",
+                                    fields: fields,
+                                    timestamp: new Date(),
+                                    footer: {
+                                      icon_url: client.user.avatarURL,
+                                      text: ""
+                                    }
                                 }
-                            }
-                        });
-                        sentMessage.delete();
+                            });
+                            sentMessage.delete();
+                        }
                     });
                 });
                 break;
