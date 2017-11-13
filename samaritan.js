@@ -217,11 +217,14 @@ client.on("message", (message) => {
                     getGuildGp(function(data) {
                         // console.log(JSON.stringify(data));
                         var list = "";
+                        data = data.sort(function(a, b) {
+                            return a.user.name.toLowerCase().localeCompare(b.user.name.toLowerCase());
+                        });
                         for (var i = 0; i < data.length; i++) {
                             var name = data[i].user.name;
                             var charGP = parseInt(data[i].gp.characterGp.replace(/,/g, ""));
                             var shipGP = parseInt(data[i].gp.shipGp.replace(/,/g, ""));
-                            var totalGP = parseInt(charGP) * 6 + parseInt(shipGP) * 4;
+                            var totalGP = (parseInt(charGP) * 6) + (parseInt(shipGP) * 4);
                             var totalGP = totalGP.toLocaleString();
                             list += name + ": " + totalGP + " GP Points\n";
                         }
@@ -1098,15 +1101,23 @@ function getGuildGp(callback) {
         var list = [];
         var index = 0;
         var info = data;
-        for (var i = 0; i < data.length; i++) {
-            var name = data[i].link.substring(3, data[i].link.length - 1);
+        for (var i = 0; i < info.length; i++) {
+            var name = info[i].link.substring(3, info[i].link.length - 1);
             var user = getGp(name, function(userGp) {
-                index = index + 1;
+                var name = userGp.name;
+                var ind = 0;
                 var userData = {};
-                userData.user = info[index];
+                for (var k = 0; k < info.length; k++) {
+                    if (info[k].link === `/u/${name}/`) {
+                        ind = k;
+                        break;
+                    }
+                }
+                userData.user = info[ind];
                 userData.gp = userGp;
-                list.push(userData);
-                if ((index + 1) == data.length) {
+                list[index] = userData;
+                index = index + 1;
+                if ((index) == data.length) {
                     callback(list);
                 }
             });
@@ -1160,6 +1171,7 @@ function getGp(user, callback) {
         data.characterGp = characterGp;
         data.shipGp = shipGp;
         data.totalGp = totalGp;
+        data.name = user;
         callback(data);
       } else {
         console.log("We’ve encountered an error: " + error);
