@@ -214,22 +214,36 @@ client.on("message", (message) => {
                 console.log("tbgp command triggered");
                 message.channel.send("Calculating the fate of the universe...")
                 .then(sentMessage => {
-                    var swgohName = getSwgohName(message);
-                    if (swgohName) {
-                        getGp(swgohName, function(data) {
+                    getGuildGp(function(data) {
+                        // console.log(JSON.stringify(data));
+                        var list = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var name = data[i].user.name;
+                            var charGP = parseInt(data[i].gp.characterGp.replace(/,/g, ""));
+                            var shipGP = parseInt(data[i].gp.shipGp.replace(/,/g, ""));
+                            var totalGP = parseInt(charGP) * 6 + parseInt(shipGP) * 4;
+                            var totalGP = totalGP.toLocaleString();
+                            list += name + ": " + totalGP + " GP Points\n";
+                        }
                         sentMessage.delete();
-                            var totalCharGP = parseInt(data.characterGp.replace(/,/g, "")) * 6;
-                            var totalShipGP = parseInt(data.shipGp.replace(/,/g, "")) * 4;
-                            var totalGP = parseInt(totalCharGP) + parseInt(totalShipGP);
-                            totalCharGP = totalCharGP.toLocaleString();
-                            totalShipGP = totalShipGP.toLocaleString();
-                            totalGP = totalGP.toLocaleString();
-                            message.channel.send(`Total Character GP: ${totalCharGP}\nTotal Ships GP: ${totalShipGP}\nTotal GP: ${totalGP}`);
-                        });
-                    } else {
-                        sentMessage.delete();
-                        sendSwgohNameError(message);
-                    }
+                        message.channel.send(list);
+                    });
+                    // var swgohName = getSwgohName(message);
+                    // if (swgohName) {
+                    //     getGp(swgohName, function(data) {
+                    //     sentMessage.delete();
+                    //         var totalCharGP = parseInt(data.characterGp.replace(/,/g, "")) * 6;
+                    //         var totalShipGP = parseInt(data.shipGp.replace(/,/g, "")) * 4;
+                    //         var totalGP = parseInt(totalCharGP) + parseInt(totalShipGP);
+                    //         totalCharGP = totalCharGP.toLocaleString();
+                    //         totalShipGP = totalShipGP.toLocaleString();
+                    //         totalGP = totalGP.toLocaleString();
+                    //         message.channel.send(`Total Character GP: ${totalCharGP}\nTotal Ships GP: ${totalShipGP}\nTotal GP: ${totalGP}`);
+                    //     });
+                    // } else {
+                    //     sentMessage.delete();
+                    //     sendSwgohNameError(message);
+                    // }
                 });
                 break;
             case "adduser":
@@ -1078,10 +1092,59 @@ function getSwgohEvents(callback) {
     });
 }
 
+function getGuildGp(callback) {
+    console.log("getting gp of users in guild");
+    getGuildList(function(data) {
+        var list = [];
+        var index = 0;
+        var info = data;
+        for (var i = 0; i < data.length; i++) {
+            var name = data[i].link.substring(3, data[i].link.length - 1);
+            var user = getGp(name, function(userGp) {
+                index = index + 1;
+                var userData = {};
+                userData.user = info[index];
+                userData.gp = userGp;
+                list.push(userData);
+                if ((index + 1) == data.length) {
+                    callback(list);
+                }
+            });
+        }
+    });
+}
+
+function getGuildList(callback) {
+    console.log("getting list of users in guild");
+    var url = 'https://swgoh.gg/g/20619/chaos-warriors-unite/';
+
+    var request = require('request');
+    var cheerio = require('cheerio');
+
+    request(url, function (error, response, body) {
+        if (!error) {
+            var $ = cheerio.load(body);
+            var data = [];
+            var numUsers = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.list-group-item.p-a > h1 > small").html();
+            var numUsers = parseInt(numUsers.substring(numUsers.indexOf("/") + 2, numUsers.indexOf("Profiles") - 1));
+            for (var i = 0; i < numUsers; i++) {
+                var link = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a").attr("href");
+                var name = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a > strong").html();
+                var user = {};
+                user.link = link;
+                user.name = name;
+                data.push(user);
+            }
+            callback(data);
+        } else {
+            console.log("We’ve encountered an error: " + error);
+        }
+    });
+}
+
 function getGp(user, callback) {
     console.log("getting gp for " + user );
     var url = 'https://swgoh.gg/u/' + user;
-    console.log("start");
 
     var request = require('request');
     var cheerio = require('cheerio');

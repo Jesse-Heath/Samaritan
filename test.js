@@ -1,49 +1,27 @@
 
-    console.log("Getting upcoming swgoh events");
-    var url = "http://swgohevents.com/";
+    console.log("getting list of users in guild");
+    var url = 'https://swgoh.gg/g/20619/chaos-warriors-unite/';
 
     var request = require('request');
     var cheerio = require('cheerio');
 
     request(url, function (error, response, body) {
-      if (!error) {
-        var $ = cheerio.load(body);
-        var data = [];
-        var decode = require('decode-html');
-        var eventsList = $("body > div > div > div.events").find(".event");
-
-        for (var i = 0; i < eventsList.length; i++) {
-            var events = eventsList;
-            for (var j = 0; j < i; j++) {
-                events = events.next();
+        if (!error) {
+            var $ = cheerio.load(body);
+            var data = [];
+            var numUsers = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.list-group-item.p-a > h1 > small").html();
+            var numUsers = parseInt(numUsers.substring(numUsers.indexOf("/") + 2, numUsers.indexOf("Profiles") - 1));
+            console.log(numUsers);
+            for (var i = 0; i < numUsers; i++) {
+                var link = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a").attr("href");
+                var name = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a > strong").html();
+                var user = {};
+                user.link = link;
+                user.name = name;
+                data.push(user);
             }
-            var event = {};
-            event.name = decode(events.children(".event_name").children("a").html());
-            event.date = events.children(".event_details").children("span").html();
-            event.state = "Unknown";
-            event.state = events.children(".event_details").children("span").attr("class");
-            event.details = events.children(".event_details").text();
-            event.details = event.details.replace(/\n/g, "").trim();
-            if (event.date == null) {
-                event.date = "Unknown";
-            }
-            if (event.state == null) {
-                event.state = "Unknown";
-            }
-            data.push(event);
+            console.log(JSON.stringify(data));
+        } else {
+            console.log("We’ve encountered an error: " + error);
         }
-        // console.log(JSON.stringify(data));
-        console.log(data.length);
-
-        // var sort = data.sort(function(a, b) {
-        //     // console.log("Comparing:\n" + JSON.stringify(a) + "\nTo:\n" + JSON.stringify(b));
-        //     console.log(a.date + " > " + b.date + " = " + (a.date < b.date));
-        //     return a.date < b.date;
-        // });
-        console.log(JSON.stringify(sort));
-
-        // callback(data);
-      } else {
-        console.log("We’ve encountered an error: " + error);
-      }
     });
