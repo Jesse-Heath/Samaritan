@@ -212,24 +212,44 @@ client.on("message", (message) => {
                 break;
             case "tbgp":
                 console.log("tbgp command triggered");
+                var url = config.guild;
                 message.channel.send("Calculating the fate of the universe...")
                 .then(sentMessage => {
-                    getGuildGp(function(data) {
+                    getGuildGp(url, function(data) {
                         // console.log(JSON.stringify(data));
-                        var list = "";
+                        // var list = "";
                         data = data.sort(function(a, b) {
                             return a.user.name.toLowerCase().localeCompare(b.user.name.toLowerCase());
                         });
+                        var totalGuildGP = 0;
+                        var messages = [];
+                        var listMessage = "";
                         for (var i = 0; i < data.length; i++) {
                             var name = data[i].user.name;
                             var charGP = parseInt(data[i].gp.characterGp.replace(/,/g, ""));
                             var shipGP = parseInt(data[i].gp.shipGp.replace(/,/g, ""));
                             var totalGP = (parseInt(charGP) * 6) + (parseInt(shipGP) * 4);
-                            var totalGP = totalGP.toLocaleString();
-                            list += name + ": " + totalGP + " GP Points\n";
+                            totalGuildGP += totalGP;
+                            totalGP = totalGP.toLocaleString();
+                            var entry = name + ":\n\tChars: " + charGP.toLocaleString() + " GP Points\n\tShips: " + shipGP.toLocaleString() + " GP Points\n\tTotal: " + totalGP.toLocaleString() + " GP Points\n";
+                            if (listMessage.length + entry.length > 2000) {
+                                messages.push(listMessage);
+                                listMessage = "";
+                            }
+                            listMessage += entry;
+                            // list += entry;
                         }
+                        var totalMessage = "\n==================\n\nTotal: " + totalGuildGP.toLocaleString() + " GP Points";
+                        if ((listMessage.length + totalMessage.length) > 2000) {
+                            messages.push(listMessage);
+                            listMessage = "";
+                        }
+                        listMessage += totalMessage;
+                        messages.push(listMessage);
                         sentMessage.delete();
-                        message.channel.send(list);
+                        for (var i = 0; i < messages.length; i++) {
+                            message.channel.send(messages[i]);
+                        }
                     });
                     // var swgohName = getSwgohName(message);
                     // if (swgohName) {
@@ -1095,9 +1115,7 @@ function getSwgohEvents(callback) {
     });
 }
 
-function getGuildGp(callback) {
     console.log("getting gp of users in guild");
-    getGuildList(function(data) {
         var list = [];
         var index = 0;
         var info = data;
@@ -1125,9 +1143,7 @@ function getGuildGp(callback) {
     });
 }
 
-function getGuildList(callback) {
     console.log("getting list of users in guild");
-    var url = 'https://swgoh.gg/g/20619/chaos-warriors-unite/';
 
     var request = require('request');
     var cheerio = require('cheerio');
