@@ -1115,7 +1115,9 @@ function getSwgohEvents(callback) {
     });
 }
 
+function getGuildGp(url, callback) {
     console.log("getting gp of users in guild");
+    getGuildList(url, function(data) {
         var list = [];
         var index = 0;
         var info = data;
@@ -1143,6 +1145,7 @@ function getSwgohEvents(callback) {
     });
 }
 
+function getGuildList(url, callback) {
     console.log("getting list of users in guild");
 
     var request = require('request');
@@ -1382,6 +1385,8 @@ function getZetas(user, callback) {
             var $ = cheerio.load(body);
             var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
             guildURL = "https://swgoh.gg" + guildURL + "?stats=zetas";
+            guildURL = "https://swgoh.gg" + guildURL + "zetas/";
+            console.log(guildURL);
             getZeta(guildURL, callback);
         }
     });
