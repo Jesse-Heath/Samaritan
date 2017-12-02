@@ -1384,7 +1384,6 @@ function getZetas(user, callback) {
         if (!error) {
             var $ = cheerio.load(body);
             var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
-            guildURL = "https://swgoh.gg" + guildURL + "?stats=zetas";
             guildURL = "https://swgoh.gg" + guildURL + "zetas/";
             console.log(guildURL);
             getZeta(guildURL, callback);
