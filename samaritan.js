@@ -251,22 +251,6 @@ client.on("message", (message) => {
                             message.channel.send(messages[i]);
                         }
                     });
-                    // var swgohName = getSwgohName(message);
-                    // if (swgohName) {
-                    //     getGp(swgohName, function(data) {
-                    //     sentMessage.delete();
-                    //         var totalCharGP = parseInt(data.characterGp.replace(/,/g, "")) * 6;
-                    //         var totalShipGP = parseInt(data.shipGp.replace(/,/g, "")) * 4;
-                    //         var totalGP = parseInt(totalCharGP) + parseInt(totalShipGP);
-                    //         totalCharGP = totalCharGP.toLocaleString();
-                    //         totalShipGP = totalShipGP.toLocaleString();
-                    //         totalGP = totalGP.toLocaleString();
-                    //         message.channel.send(`Total Character GP: ${totalCharGP}\nTotal Ships GP: ${totalShipGP}\nTotal GP: ${totalGP}`);
-                    //     });
-                    // } else {
-                    //     sentMessage.delete();
-                    //     sendSwgohNameError(message);
-                    // }
                 });
                 break;
             case "adduser":
@@ -577,6 +561,7 @@ client.on("message", (message) => {
                     message.channel.send("Fetching your zeta's..")
                     .then(sentMessage => {
                         getZetas(swgohName, function(data) {
+                            console.log("got final data " + JSON.stringify(data));
                             sentMessage.delete();
                             var fields = [];
 
@@ -1065,10 +1050,13 @@ function getSwgohName(message) {
     var users = require("./Config/users.json");
     var swgohName;
     if (message.mentions.users.first() !== undefined) {
+        console.log("asking for " + message.mentions.users.first().username);
         swgohName = decodeURI(users[message.mentions.users.first().id]);
     } else if (users.hasOwnProperty(message.author.id)) {
+        console.log("asking for self");
         swgohName = decodeURI(users[message.author.id]);
     } else {
+        console.log("unknown");
         swgohName = false;
     }
     return swgohName;
@@ -1115,6 +1103,8 @@ function getSwgohEvents(callback) {
     });
 }
 
+function getGuildInfo(url, callback) {
+}
 function getGuildGp(url, callback) {
     console.log("getting gp of users in guild");
     getGuildList(url, function(data) {
