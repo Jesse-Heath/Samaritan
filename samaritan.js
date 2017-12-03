@@ -1104,7 +1104,9 @@ function getSwgohEvents(callback) {
 }
 
 function getGuildInfo(url, callback) {
+
 }
+
 function getGuildGp(url, callback) {
     console.log("getting gp of users in guild");
     getGuildList(url, function(data) {
@@ -1375,7 +1377,6 @@ function getZetas(user, callback) {
             var $ = cheerio.load(body);
             var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
             guildURL = "https://swgoh.gg" + guildURL + "zetas/";
-            console.log(guildURL);
             getZeta(guildURL, callback);
         }
     });
@@ -1388,9 +1389,12 @@ function getZetas(user, callback) {
                 var $ = cheerio.load(body);
                 var numUsers = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody").html();
                 numUsers = numUsers.split("<tr>");
+                console.log("num users in guild = " + numUsers.length);
                 for (var i = 0; i < (numUsers.length - 1); i++) {
                     var username = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td > a").attr("href");
-                    if (username == `/u/${user}/`) {
+                    console.log(username  + " <> " + `/u/${user}/`);
+                    if (username.toLowerCase() == `/u/${user.toLowerCase()}/`) {
+                        console.log("found user");
                         var data = {};
                         var numTotalZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td.text-center").html();
                         data.num = numTotalZetas;
