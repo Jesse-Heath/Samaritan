@@ -93,6 +93,149 @@ client.on("message", (message) => {
         const command = args.shift().toLowerCase();
 
         switch(command) {
+            case "tw-info":
+                console.log("tw-info command triggered");
+                var url = config.twguild;
+                var char = args.shift();
+                message.channel.send("Calculating the fate of the universe...")
+                .then(sentMessage => {
+                    getGuildInfo(url, char, function(data) {
+                        console.log(JSON.stringify(data));
+                        var gear12s = data.filter(function(user) {
+                            return user.stats.gear == 12;
+                        });
+                        var gear11s = data.filter(function(user) {
+                            return user.stats.gear == 11;
+                        });
+                        var gear10s = data.filter(function(user) {
+                            return user.stats.gear == 10;
+                        });
+                        var star7s = data.filter(function(user) {
+                            return user.stats.stars == 7;
+                        });
+                        var star6s = data.filter(function(user) {
+                            return user.stats.stars == 6;
+                        });
+                        var star5s = data.filter(function(user) {
+                            return user.stats.stars == 5;
+                        });
+                        var zetas = {};
+                        for (var userIndex = 0; userIndex < data.length; userIndex++) {
+                            for (var charIndex = 0; charIndex < data[userIndex].zeta.zetas.length; charIndex++) {
+                                var name = data[userIndex].zeta.zetas[charIndex].name;
+                                if (!zetas.hasOwnProperty(name)) {
+                                    zetas[name] = {};
+                                }
+                                for (var zetaIndex = 0; zetaIndex < data[userIndex].zeta.zetas[charIndex].zetas.length; zetaIndex++) {
+                                    var zeta = data[userIndex].zeta.zetas[charIndex].zetas[zetaIndex];
+                                    if (!zetas[name].hasOwnProperty(zeta)) {
+                                        zetas[name][zeta] = 0;
+                                    }
+                                    zetas[name][zeta] += 1;
+                                }
+                            }
+                        }
+                        // console.log(JSON.stringify(zetas));
+                        var gearDetailsContent = message.guild.emojis.find("name", "gear12") + ": " + gear12s.length;
+                        gearDetailsContent += "\n" + message.guild.emojis.find("name", "gear11") + ": " + gear11s.length;
+                        gearDetailsContent += "\n" + message.guild.emojis.find("name", "gear10") + ": " + gear10s.length;
+                        var starDetailsContent = "\n7" + message.guild.emojis.find("name", "swgohstar") + ": " + star7s.length;
+                        starDetailsContent += "\n6" + message.guild.emojis.find("name", "swgohstar") + ": " + star6s.length;
+                        starDetailsContent += "\n5" + message.guild.emojis.find("name", "swgohstar") + ": " + star5s.length;
+                        var otherDetails = "";
+                        console.log(JSON.stringify(Object.keys(zetas)));
+                        var fields = [
+                            {
+                                name: "Gear Details",
+                                value: gearDetailsContent,
+                                inline: true
+                            },{
+                                name: "Star Details",
+                                value: starDetailsContent,
+                                inline: true
+                            }
+                        ];
+                        message.channel.send({
+                            embed: {
+                                author: {
+                                  name: client.user.username,
+                                  icon_url: client.user.avatarURL
+                                },
+                                title: "Info on your opponents " + char,
+                                fields: fields,
+                                timestamp: new Date(),
+                                footer: {
+                                  icon_url: client.user.avatarURL,
+                                  text: ""
+                                }
+                            }
+                        });
+                        sentMessage.delete();
+                    });
+                });
+                break;
+            case "tw-zetas":
+                console.log("tw-info command triggered");
+                var url = config.twguild;
+                var char = args.shift();
+                message.channel.send("Calculating the fate of the universe...")
+                .then(sentMessage => {
+                    getGuildZetas(url, function(data) {
+                        console.log(JSON.stringify(data));
+                        var zetas = {};
+                        for (var userIndex = 0; userIndex < data.length; userIndex++) {
+                            for (var charIndex = 0; charIndex < data[userIndex].zeta.zetas.length; charIndex++) {
+                                var name = data[userIndex].zeta.zetas[charIndex].name;
+                                if (!zetas.hasOwnProperty(name)) {
+                                    zetas[name] = {};
+                                }
+                                for (var zetaIndex = 0; zetaIndex < data[userIndex].zeta.zetas[charIndex].zetas.length; zetaIndex++) {
+                                    var zeta = data[userIndex].zeta.zetas[charIndex].zetas[zetaIndex];
+                                    if (!zetas[name].hasOwnProperty(zeta)) {
+                                        zetas[name][zeta] = 0;
+                                    }
+                                    zetas[name][zeta] += 1;
+                                }
+                            }
+                        }
+                        var fields = [];
+                        Object.keys(zetas).forEach(
+                            function(charName, charIndex, listObj) {
+                                console.log(charName);
+                                var field = {
+                                    name: charName,
+                                    value: "",
+                                    inline: true
+                                };
+                                Object.keys(zetas[charName]).forEach(
+                                    function(zetaName, zetaIndex, listObj) {
+                                        console.log(zetaName);
+
+                                        field.value += `${zetaName}: ${zetas[charName][zetaName]}\n`;
+                                    }
+                                );
+                                fields.push(field);
+                            }
+                        );
+                        message.channel.send({
+                            embed: {
+                                author: {
+                                  name: client.user.username,
+                                  icon_url: client.user.avatarURL
+                                },
+                                title: "Info on your opponents zetas",
+                                fields: fields,
+                                timestamp: new Date(),
+                                footer: {
+                                  icon_url: client.user.avatarURL,
+                                  text: ""
+                                }
+                            }
+                        });
+                        sentMessage.delete();
+                    });
+                });
+                break;
             case "events":
                 console.log("events command triggered");
                 message.channel.send("Forecasting the future like a boss...")
@@ -1103,8 +1246,83 @@ function getSwgohEvents(callback) {
     });
 }
 
-function getGuildInfo(url, callback) {
+function getGuildInfo(url, char, callback) {
+    console.log("getting list of users in guild");
+    getGuildList(url, function(data) {
+        var list = [];
+        var infoIndex = 0;
+        var zetaIndex = 0;
+        var info = data;
+        for (var i = 0; i < info.length; i++) {
+            var name = info[i].link.substring(3, info[i].link.length - 1);
+            list[i] = {};
+            getZetas(name, function(zetaInfo) {
+                var name = zetaInfo.name;
+                var ind = 0;
+                var userData = {};
+                for (var k = 0; k < info.length; k++) {
+                    if (info[k].link.toLowerCase() === `/u/${name.toLowerCase()}/`) {
+                        ind = k;
+                        break;
+                    }
+                }
+                list[zetaIndex].user = info[ind];
+                list[zetaIndex].zeta = zetaInfo;
+                zetaIndex = zetaIndex + 1;
+                if (infoIndex == data.length && zetaIndex == data.length) {
+                    callback(list);
+                }
+            });
+            getInfo(name, char, function(charInfo) {
+                var name = charInfo.name;
+                var ind = 0;
+                var userData = {};
+                for (var k = 0; k < info.length; k++) {
+                    if (info[k].link.toLowerCase() === `/u/${name.toLowerCase()}/`) {
+                        ind = k;
+                        break;
+                    }
+                }
+                list[infoIndex].user = info[ind];
+                list[infoIndex].stats = charInfo;
+                infoIndex = infoIndex + 1;
+                if (infoIndex == data.length && zetaIndex == data.length) {
+                    callback(list);
+                }
+            });
+        }
+    });
+}
 
+function getGuildZetas(url, callback) {
+    console.log("getting list of users in guild");
+    getGuildList(url, function(data) {
+        var list = [];
+        var infoIndex = 0;
+        var zetaIndex = 0;
+        var info = data;
+        for (var i = 0; i < info.length; i++) {
+            var name = info[i].link.substring(3, info[i].link.length - 1);
+            list[i] = {};
+            getZetas(name, function(zetaInfo) {
+                var name = zetaInfo.name;
+                var ind = 0;
+                var userData = {};
+                for (var k = 0; k < info.length; k++) {
+                    if (info[k].link.toLowerCase() === `/u/${name.toLowerCase()}/`) {
+                        ind = k;
+                        break;
+                    }
+                }
+                list[zetaIndex].user = info[ind];
+                list[zetaIndex].zeta = zetaInfo;
+                zetaIndex = zetaIndex + 1;
+                if (zetaIndex == data.length) {
+                    callback(list);
+                }
+            });
+        }
+    });
 }
 
 function getGuildGp(url, callback) {
@@ -1396,6 +1614,7 @@ function getZetas(user, callback) {
                     if (username.toLowerCase() == `/u/${user.toLowerCase()}/`) {
                         console.log("found user");
                         var data = {};
+                        data.name = user;
                         var numTotalZetas = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td.text-center").html();
                         data.num = numTotalZetas;
                         var chars = $("body > div.container.p-t-md > div.content-container > div.content-container-primary.character-list > ul > li.media.list-group-item.p-0.b-t-0 > div > table > tbody > tr:nth-child(" + (i + 1) + ") > td:nth-child(3)").html();
@@ -1701,13 +1920,16 @@ function getShipSkills(user, ship, callback) {
 function getInfo(user, char, callback) {
     console.log("getting info for " + char + " on profile " + user);
     var url = '/u/' + user + '/collection/' + char + '/';
-    getStats(url, callback);
+    getStats(url, function(data) {
+        data.name = user;
+        callback(data);
+    });
 }
 
 function getStats(url, callback) {
     var config = require("./Config/config.json");
     var url = 'https://swgoh.gg' + url;
-
+    console.log("getting stats for " + url);
     var request = require('request');
     var cheerio = require('cheerio');
 
