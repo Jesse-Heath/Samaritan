@@ -96,7 +96,11 @@ client.on("message", (message) => {
             case "tw-info":
                 console.log("tw-info command triggered");
                 var url = config.twguild;
-                var char = args.shift();
+                var char = args.join(" ");
+                if (char === "") {
+                    message.channel.send("Please specify a character");
+                    break;
+                }
                 message.channel.send("Calculating the fate of the universe...")
                 .then(sentMessage => {
                     getGuildInfo(url, char, function(data) {
@@ -177,7 +181,6 @@ client.on("message", (message) => {
             case "tw-zetas":
                 console.log("tw-info command triggered");
                 var url = config.twguild;
-                var char = args.shift();
                 message.channel.send("Calculating the fate of the universe...")
                 .then(sentMessage => {
                     getGuildZetas(url, function(data) {
@@ -198,25 +201,74 @@ client.on("message", (message) => {
                                 }
                             }
                         }
+                        var zetasList = [];
                         var fields = [];
                         Object.keys(zetas).forEach(
                             function(charName, charIndex, listObj) {
                                 console.log(charName);
-                                var field = {
-                                    name: charName,
-                                    value: "",
-                                    inline: true
-                                };
+                                var zetaList = {};
+                                zetaList.name = charName;
+                                zetaList.num = 0;
+                                zetaList.list = [];
                                 Object.keys(zetas[charName]).forEach(
                                     function(zetaName, zetaIndex, listObj) {
                                         console.log(zetaName);
-
-                                        field.value += `${zetaName}: ${zetas[charName][zetaName]}\n`;
+                                        var zetaInfo = {}
+                                        zetaInfo.name = zetaName;
+                                        zetaInfo.num = zetas[charName][zetaName];
+                                        zetaList.num += zetas[charName][zetaName];
+                                        zetaList.list.push(zetaInfo);
                                     }
                                 );
-                                fields.push(field);
+                                zetasList.push(zetaList);
                             }
                         );
+
+                        for (var i = 0; i < zetasList.length - 1; i++) {
+                            for (var k = i + 1; k < zetasList.length; k++) {
+                                if (zetasList[i].num < zetasList[k].num) {
+                                    var temp = zetasList[i];
+                                    zetasList[i] = zetasList[k];
+                                    zetasList[k] = temp;
+                                }
+                                if (zetasList[i].num === zetasList[k].num) {
+                                    if (zetasList[i].list.length < zetasList[k].list.length) {
+                                        var temp = zetasList[i];
+                                        zetasList[i] = zetasList[k];
+                                        zetasList[k] = temp;
+                                    }
+                                }
+                            }
+                        }
+
+                        for (var i = 0; i < zetasList.length; i++) {
+                            if (zetasList[i].list.length > 1) {
+                                for (var l = 0; l < zetasList[i].list.length - 1; l++) {
+                                    for (var m = l + 1; m < zetasList[i].list.length; m++) {
+                                        if (zetasList[i].list[l].num < zetasList[i].list[m].num) {
+                                            var temp = zetasList[i].list[l];
+                                            zetasList[i].list[l] = zetasList[i].list[m];
+                                            zetasList[i].list[m] = temp;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        console.log(JSON.stringify(zetasList));
+                        for (var charIndex = 0; charIndex < zetasList.length; charIndex++) {
+                            var charName = zetasList[charIndex].name;
+                            var field = {
+                                name: charName + ` (${zetasList[charIndex].num})`,
+                                value: "",
+                                inline: true
+                            };
+                            for (var zetaIndex = 0; zetaIndex < zetasList[charIndex].list.length; zetaIndex++) {
+                                var zetaName = zetasList[charIndex].list[zetaIndex].name;
+                                var zetaNum = zetasList[charIndex].list[zetaIndex].num;
+                                field.value += `${zetaName}: ${zetaNum}\n`;
+                            }
+                            fields.push(field);
+                        }
                         message.channel.send({
                             embed: {
                                 author: {
