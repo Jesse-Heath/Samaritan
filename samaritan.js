@@ -50,7 +50,7 @@ client.on("messageDelete", (message) => {
 });
 
 client.on("message", (message) => {
-    if (message.author.bot) return;
+console.log(message);    if (message.author.bot) return;
     var config = require("./Config/config.json");
     try {
         if (message.mentions.users.first() != undefined && message.mentions.users.first().username == client.user.username) {
@@ -91,7 +91,7 @@ client.on("message", (message) => {
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
-
+console.log(message);
         switch(command) {
             case "tw-info":
                 console.log("tw-info command triggered");
@@ -157,12 +157,16 @@ client.on("message", (message) => {
                                 name: "Star Details",
                                 value: starDetailsContent,
                                 inline: true
+                            }, {
+                                name: "Other Details",
+                                value: otherDetailsContent,
+                                inline: true
                             }
                         ];
                         message.channel.send({
                             embed: {
                                 author: {
-                                  name: client.user.username,
+                                  name: client.user.username + " (Spy version)",
                                   icon_url: client.user.avatarURL
                                 },
                                 title: "Info on your opponents " + char,
@@ -272,7 +276,7 @@ client.on("message", (message) => {
                         message.channel.send({
                             embed: {
                                 author: {
-                                  name: client.user.username,
+                                  name: client.user.username + " (Spy version)",
                                   icon_url: client.user.avatarURL
                                 },
                                 title: "Info on your opponents zetas",
@@ -576,6 +580,9 @@ client.on("message", (message) => {
                     var list = "";
                     for (var userId in users) {
                         var username;
+                        if (message.channel.guild.members.get(userId) === null) {
+                            continue;
+                        }
                         if (message.channel.guild.members.get(userId).nickname === null) {
                             username = message.channel.guild.members.get(userId).user.username;
                         } else {
