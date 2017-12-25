@@ -580,7 +580,7 @@ console.log(message);
                     var list = "";
                     for (var userId in users) {
                         var username;
-                        if (message.channel.guild.members.get(userId) === null) {
+                        if (message.channel.guild.members.get(userId) === undefined) {
                             continue;
                         }
                         if (message.channel.guild.members.get(userId).nickname === null) {
