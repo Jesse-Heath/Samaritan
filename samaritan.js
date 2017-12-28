@@ -146,7 +146,7 @@ console.log(message);
                         var starDetailsContent = "\n7" + message.guild.emojis.find("name", "swgohstar") + ": " + star7s.length;
                         starDetailsContent += "\n6" + message.guild.emojis.find("name", "swgohstar") + ": " + star6s.length;
                         starDetailsContent += "\n5" + message.guild.emojis.find("name", "swgohstar") + ": " + star5s.length;
-                        var otherDetails = "";
+                        var otherDetailsContent = "";
                         console.log(JSON.stringify(Object.keys(zetas)));
                         var fields = [
                             {
