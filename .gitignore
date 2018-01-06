@@ -1,6 +1,7 @@
 Config/auth.json
 Config/config.json
 Config/users.json
+Config/aliases.json
 
 # Logs
 logs

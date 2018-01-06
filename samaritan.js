@@ -147,7 +147,6 @@ client.on("message", (message) => {
     if (message.content.startsWith(config.commandPrefix)) {
         var args = message.content.slice(config.commandPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
-console.log(message);
         switch(command) {
             case "tw-info":
                 console.log("tw-info command triggered");
@@ -508,64 +507,122 @@ console.log(message);
                     });
                 });
                 break;
-            case "adduser":
-                console.log("add user command triggered");
-                var fs = require("fs");
-                var users = require("./Config/users.json");
-                if (message.mentions.users.first() === undefined) {
-                    users[message.author.id] = encodeURI(args.join(" "));
-                } else {
-                    var doesHeHaveThePower = false;
-                    message.member.roles.forEach(
-                        function(role, currentIndex, listObj) {
-                            if (role.name === "Officers" || role.name === "admin") {
-                                doesHeHaveThePower = true;
+            case "add":
+                const whatToAdd = args.shift();
+                switch (whatToAdd) {
+                    case "user":
+                        console.log("add user command triggered");
+                        var fs = require("fs");
+                        var users = require("./Config/users.json");
+                        if (message.mentions.users.first() === undefined) {
+                            users[message.author.id] = encodeURI(args.join(" "));
+                        } else {
+                            var doesHeHaveThePower = false;
+                            message.member.roles.forEach(
+                                function(role, currentIndex, listObj) {
+                                    if (role.name === "Officers" || role.name === "admin") {
+                                        doesHeHaveThePower = true;
+                                    }
+                                }
+                            );
+                            if (doesHeHaveThePower) {
+                                var name = args.join(" ").toLowerCase().replace(/<.*>/g, "").trim();
+                                if (args[0].startsWith("<@") && args[0].endsWith(">")) {
+                                    args.shift();
+                                    users[message.mentions.users.first().id] = encodeURI(name);
+                                } else {
+                                    users[message.mentions.users.first().id] = encodeURI(name);
+                                }
+                            } else {
+                                message.channel.send("Sorry, but you don't have the access to add users for other people")
+                                .then(sentMessage => {
+                                    setTimeout(
+                                        function () {
+                                            sentMessage.delete();
+                                        },
+                                        3000
+                                    );
+                                });
                             }
                         }
-                    );
-                    if (doesHeHaveThePower) {
-                        var name = args.join(" ").replace(/<.*>/g, "").trim();
-                        if (args[0].startsWith("<@") && args[0].endsWith(">")) {
-                            args.shift();
-                            users[message.mentions.users.first().id] = encodeURI(name);
+                        fs.writeFile("./Config/users.json", JSON.stringify(users, null, 4), "utf8", function(err, data) {
+                            if (err) {
+                                message.channel.send("Whoops, i couldn't add your user")
+                                .then(sentMessage => {
+                                    setTimeout(
+                                        function () {
+                                            sentMessage.delete();
+                                        },
+                                        3000
+                                    );
+                                });
+                            } else {
+                                message.channel.send("Successfully added user")
+                                .then(sentMessage => {
+                                    setTimeout(
+                                        function () {
+                                            sentMessage.delete();
+                                        },
+                                        3000
+                                    );
+                                });
+                            }
+                        });
+                        break;
+                    case "alias":
+                        console.log("add alias command triggered");
+                        var fs = require("fs");
+                        var aliases = require("./Config/aliases.json");
+                        var doesHeHaveThePower = false;
+                        message.member.roles.forEach(
+                            function(role, currentIndex, listObj) {
+                                if (role.name === "Officers" || role.name === "admin") {
+                                    doesHeHaveThePower = true;
+                                }
+                            }
+                        );
+                        if (doesHeHaveThePower) {
+                            var name = args.shift().toLowerCase();
+                            var alias = args.join(" ").toLowerCase();
+                            aliases[alias] = name;
                         } else {
-                            users[message.mentions.users.first().id] = encodeURI(name);
+                            message.channel.send("Sorry, but you don't have the access to add aliases")
+                            .then(sentMessage => {
+                                setTimeout(
+                                    function () {
+                                        sentMessage.delete();
+                                    },
+                                    3000
+                                );
+                            });
                         }
-                    } else {
-                        message.channel.send("Sorry, but you don't have the access to add users for other people")
-                        .then(sentMessage => {
-                            setTimeout(
-                                function () {
-                                    sentMessage.delete();
-                                },
-                                3000
-                            );
+                        fs.writeFile("./Config/aliases.json", JSON.stringify(aliases, null, 4), "utf8", function(err, data) {
+                            if (err) {
+                                message.channel.send("Whoops, i couldn't add your alias")
+                                .then(sentMessage => {
+                                    setTimeout(
+                                        function () {
+                                            sentMessage.delete();
+                                        },
+                                        3000
+                                    );
+                                });
+                            } else {
+                                message.channel.send("Successfully added alias")
+                                .then(sentMessage => {
+                                    setTimeout(
+                                        function () {
+                                            sentMessage.delete();
+                                        },
+                                        3000
+                                    );
+                                });
+                            }
                         });
-                    }
+                        break;
+                    default:
+                        console.log("unknown add command: " + whatToAdd + ": " + args);
                 }
-                fs.writeFile("./Config/users.json", JSON.stringify(users, null, 4), "utf8", function(err, data) {
-                    if (err) {
-                        message.channel.send("Whoops, i couldn't add your user")
-                        .then(sentMessage => {
-                            setTimeout(
-                                function () {
-                                    sentMessage.delete();
-                                },
-                                3000
-                            );
-                        });
-                    } else {
-                        message.channel.send("Successfully added user")
-                        .then(sentMessage => {
-                            setTimeout(
-                                function () {
-                                    sentMessage.delete();
-                                },
-                                3000
-                            );
-                        });
-                    }
-                });
                 break;
             case "removeuser":
                 console.log("remove user command triggered");
@@ -620,43 +677,97 @@ console.log(message);
                     }
                 });
                 break;
-            case "listusers":
-                console.log("list users command triggered");
-                var fs = require("fs");
-                var users = require("./Config/users.json");
-                var doesHeHaveThePower = false;
-                message.member.roles.forEach(
-                    function(role, currentIndex, listObj) {
-                        if (role.name === "Officers" || role.name === "admin") {
-                            doesHeHaveThePower = true;
-                        }
-                    }
-                );
-                if (doesHeHaveThePower) {
-                    var list = "";
-                    for (var userId in users) {
-                        var username;
-                        if (message.channel.guild.members.get(userId) === undefined) {
-                            continue;
-                        }
-                        if (message.channel.guild.members.get(userId).nickname === null) {
-                            username = message.channel.guild.members.get(userId).user.username;
-                        } else {
-                            username = message.channel.guild.members.get(userId).nickname;
-                        }
-                        list += `${username} has swgoh name: ${decodeURI(users[userId])}\n`;
-                    }
-                    message.channel.send(list);
-                } else {
-                    message.channel.send("Sorry, but you don't have the access to list users")
-                    .then(sentMessage => {
-                        setTimeout(
-                            function () {
-                                sentMessage.delete();
-                            },
-                            3000
+            case "list":
+                const whatToList = args.shift();
+                switch (whatToList) {
+                    case "user":
+                    case "users":
+                        console.log("list users command triggered");
+                        var fs = require("fs");
+                        var users = require("./Config/users.json");
+                        var doesHeHaveThePower = false;
+                        message.member.roles.forEach(
+                            function(role, currentIndex, listObj) {
+                                if (role.name === "Officers" || role.name === "admin") {
+                                    doesHeHaveThePower = true;
+                                }
+                            }
                         );
-                    });
+                        if (doesHeHaveThePower) {
+                            var list = "";
+                            for (var userId in users) {
+                                var username;
+                                if (message.channel.guild.members.get(userId) === undefined) {
+                                    continue;
+                                }
+                                if (message.channel.guild.members.get(userId).nickname === null) {
+                                    username = message.channel.guild.members.get(userId).user.username;
+                                } else {
+                                    username = message.channel.guild.members.get(userId).nickname;
+                                }
+                                list += `${username} has swgoh name: ${decodeURI(users[userId])}\n`;
+                            }
+                            message.channel.send(list);
+                        } else {
+                            message.channel.send("Sorry, but you don't have the access to list users")
+                            .then(sentMessage => {
+                                setTimeout(
+                                    function () {
+                                        sentMessage.delete();
+                                    },
+                                    3000
+                                );
+                            });
+                        }
+                        break;
+                    case "alias":
+                    case "aliases":
+                        console.log("list alias command triggered");
+                        var fs = require("fs");
+                        var aliases = require("./Config/aliases.json");
+                        var doesHeHaveThePower = false;
+                        message.member.roles.forEach(
+                            function(role, currentIndex, listObj) {
+                                if (role.name === "Officers" || role.name === "admin") {
+                                    doesHeHaveThePower = true;
+                                }
+                            }
+                        );
+                        if (doesHeHaveThePower) {
+                            var list = "";
+                            var messages = [];
+                            for (var aliasName in aliases) {
+                                var content = `\`${aliasName}\` has alias: \`${aliases[aliasName]}\`\n`;
+                                if (list.length + content.length > 2000) {
+                                    messages.push(list);
+                                    list = "";
+                                }
+                                list += content;
+                            }
+                            if (messages.length == 0) {
+                                if (list == "") {
+                                    messages.push("None yet");
+                                } else {
+                                    messages.push(list);
+                                }
+                            }
+                            for (var i = 0; i < messages.length; i++) {
+                                message.channel.send(messages[i]);
+                            }
+                        } else {
+                            message.channel.send("Sorry, but you don't have the access to list users")
+                            .then(sentMessage => {
+                                setTimeout(
+                                    function () {
+                                        sentMessage.delete();
+                                    },
+                                    3000
+                                );
+                            });
+                        }
+                        break;
+                    default:
+                        console.log("unknown list command: " + whatToList + ": " + args);
                 }
                 break;
             case "time":
@@ -897,10 +1008,14 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Sure thing <@" + message.author.id + ">. Give me a moment...")
                     .then(sentMessage => {
-                        getMods(swgohName, args[0], function (uuid) {
+                        var charName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        charName = aliases[charName] === undefined ? charName : aliases[charName];
+                        charName = charName.replace(" ", "-");
+                        getMods(swgohName, charName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} mods on ${args[0]}`,
+                                `Here's ${swgohName} mods on ${charName}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -920,7 +1035,11 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Compiling data <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getInfo(swgohName, args[0], function (data) {
+                        var charName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        charName = aliases[charName] === undefined ? charName : aliases[charName];
+                        charName = charName.replace(" ", "-");
+                        getInfo(swgohName, charName, function (data) {
                             sentMessage.delete();
                             const gear = message.guild.emojis.find("name", "gear" + data.gear);
                             message.channel.send({
@@ -930,8 +1049,8 @@ console.log(message);
                                         icon_url: client.user.avatarURL
                                     },
                                     color: 59120,
-                                    title: args[0] + " Stats",
-                                    url: "https://swgoh.gg/u/" + swgohName + "/collection/" + args[0] + "/",
+                                    title: charName + " Stats",
+                                    url: "https://swgoh.gg/u/" + swgohName + "/collection/" + charName + "/",
                                     fields: [
                                         {
                                             name: "Info",
@@ -1013,10 +1132,14 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("I'll get right on that <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getGearLevel(swgohName, args[0], function (uuid, data) {
+                        var charName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        charName = aliases[charName] === undefined ? charName : aliases[charName];
+                        charName = charName.replace(" ", "-");
+                        getGearLevel(swgohName, charName, function (uuid, data) {
                             sentMessage.delete();
                             message.channel.send(
-                                `Here's ${swgohName} gear level for ${args[0]}`,
+                                `Here's ${swgohName} gear level for ${charName}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1040,7 +1163,7 @@ console.log(message);
                                           icon_url: client.user.avatarURL
                                         },
                                         title: "Your also need these gear",
-                                        url: "https://swgoh.gg/u/" + swgohName + "/collection/" + args[0] + "/",
+                                        url: "https://swgoh.gg/u/" + swgohName + "/collection/" + charName + "/",
                                         fields: fields,
                                         timestamp: new Date(),
                                         footer: {
@@ -1063,10 +1186,14 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("So demanding <@" + message.author.id + ">...")
                     .then(sentMessage => {
-                        getGearNeeded(swgohName, args[0], function (uuid) {
+                        var charName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        charName = aliases[charName] === undefined ? charName : aliases[charName];
+                        charName = charName.replace(" ", "-");
+                        getGearNeeded(swgohName, charName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} gear needed for ${args[0]}`,
+                                `Here's ${swgohName} gear needed for ${charName}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1086,7 +1213,11 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Its on the way via carrier pigeon <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getSkills(swgohName, args[0], function (data) {
+                        var charName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        charName = aliases[charName] === undefined ? charName : aliases[charName];
+                        charName = charName.replace(" ", "-");
+                        getSkills(swgohName, charName, function (data) {
                             var fields = [];
                             var numMaxed = 0;
                             for (var i = 0; i < data.count; i++) {
@@ -1119,8 +1250,8 @@ console.log(message);
                                   icon_url: client.user.avatarURL
                                 },
                                 color: 7929720,
-                                title: "Abilities for " + args[0],
-                                url: "https://swgoh.gg/u/" + swgohName + "/collection/" + args[0] + "/",
+                                title: "Abilities for " + charName,
+                                url: "https://swgoh.gg/u/" + swgohName + "/collection/" + charName + "/",
                                 description: descriptionText,
                                 fields: fields,
                                 timestamp: new Date(),
@@ -1143,10 +1274,14 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Fine, i will fetch it for you <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getFaction(swgohName, args[0], function (uuid) {
+                        var factionName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        factionName = aliases[factionName] === undefined ? factionName : aliases[factionName];
+                        factionName = factionName.replace(" ", "-");
+                        getFaction(swgohName, factionName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} characters for ${args[0]} faction`,
+                                `Here's ${swgohName} characters for ${factionName} faction`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1220,7 +1355,11 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Its on it's way <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getShipSkills(swgohName, args[0], function (data) {
+                        var shipName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        shipName = aliases[shipName] === undefined ? shipName : aliases[shipName];
+                        shipName = shipName.replace(" ", "-");
+                        getShipSkills(swgohName, shipName, function (data) {
                             var fields = [];
                             var numMaxed = 0;
                             for (var i = 0; i < data.count; i++) {
@@ -1252,8 +1391,8 @@ console.log(message);
                                     name: client.user.username,
                                     icon_url: client.user.avatarURL
                                 },
-                                title: "Abilities for " + args[0],
-                                url: "https://swgoh.gg/u/" + swgohName + "/collection/" + args[0] + "/",
+                                title: "Abilities for " + shipName,
+                                url: "https://swgoh.gg/u/" + swgohName + "/collection/" + shipName + "/",
                                 description: descriptionText,
                                 fields: fields,
                                 timestamp: new Date(),
@@ -1276,10 +1415,14 @@ console.log(message);
                 if (swgohName) {
                     message.channel.send("Ok, collecting data <@" + message.author.id + ">")
                     .then(sentMessage => {
-                        getShipFaction(swgohName, args[0], function (uuid) {
+                        var factionName = args.join(" ").toLowerCase();
+                        var aliases = require("./Config/aliases.json");
+                        factionName = aliases[factionName] === undefined ? factionName : aliases[factionName];
+                        factionName = factionName.replace(" ", "-");
+                        getShipFaction(swgohName, factionName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} ships for ${args[0]} faction`,
+                                `Here's ${swgohName} ships for ${factionName} faction`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
