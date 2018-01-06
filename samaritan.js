@@ -906,6 +906,11 @@ console.log(message);
                                             inline: true
                                         },
                                         {
+                                            name: "Defense",
+                                            value: data.defense,
+                                            inline: true
+                                        },
+                                        {
                                             name: "Crit Damage",
                                             value: data.crit_damage,
                                             inline: true
@@ -2002,6 +2007,7 @@ function getStats(url, callback) {
         var crit_damage = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(4) > .pc-stat-value").html();
         var potency = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(5) > .pc-stat-value").html();
         var tenacity = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(6) > .pc-stat-value").html();
+        var defense = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(5) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").html();
         var basic_crit_chance = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(4) > .media-body > .media-body > .pc-stat:nth-child(2) > .pc-stat-value").html();
         var special_crit_chance = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(6) > .media-body > .media-body > .pc-stat:nth-child(2) > .pc-stat-value").html();
         var basic_damage = $(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(4) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").html();
@@ -2026,6 +2032,7 @@ function getStats(url, callback) {
             "speed": speed,
             "potency": potency,
             "tenacity": tenacity,
+            "defense": defense,
             "crit_damage": crit_damage,
             "basic_crit_chance": basic_crit_chance,
             "special_crit_chance": special_crit_chance,

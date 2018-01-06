@@ -34,6 +34,10 @@ page.open(url, function(status) {
         return document.querySelector(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(3) > .media-body > .media-body > .pc-stat:nth-child(6) > .pc-stat-value").innerHTML;
     });
     console.log("tenacity: " + tenacity);
+    var defense = page.evaluate(function(){
+        return document.querySelector(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(5) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").innerHTML;
+    });
+    console.log("defense: " + defense);
     var basic_crit_chance = page.evaluate(function(){
         return document.querySelector(".content-container-primary-aside > .list-group.media-list.media-list-stream > .media.list-group-item.p-sm:nth-child(4) > .media-body > .media-body > .pc-stat:nth-child(1) > .pc-stat-value").innerHTML;
     });
@@ -56,6 +60,7 @@ page.open(url, function(status) {
         "speed": speed,
         "potency": potency,
         "tenacity": tenacity,
+        "defense": defense,
         "crit_damage": crit_damage,
         "basic_crit_chance": basic_crit_chance,
         "special_crit_chance": special_crit_chance,
@@ -70,4 +75,4 @@ page.open(url, function(status) {
     phantom.exit(data);
     return data;
 });
-console.log('done grabbing image');
+console.log('done getting data');
