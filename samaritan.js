@@ -725,45 +725,25 @@ client.on("message", (message) => {
                         console.log("list alias command triggered");
                         var fs = require("fs");
                         var aliases = require("./Config/aliases.json");
-                        var doesHeHaveThePower = false;
-                        message.member.roles.forEach(
-                            function(role, currentIndex, listObj) {
-                                if (role.name === "Officers" || role.name === "admin") {
-                                    doesHeHaveThePower = true;
-                                }
+                        var list = "";
+                        var messages = [];
+                        for (var aliasName in aliases) {
+                            var content = `\`${aliasName}\` has alias: \`${aliases[aliasName]}\`\n`;
+                            if (list.length + content.length > 2000) {
+                                messages.push(list);
+                                list = "";
                             }
-                        );
-                        if (doesHeHaveThePower) {
-                            var list = "";
-                            var messages = [];
-                            for (var aliasName in aliases) {
-                                var content = `\`${aliasName}\` has alias: \`${aliases[aliasName]}\`\n`;
-                                if (list.length + content.length > 2000) {
-                                    messages.push(list);
-                                    list = "";
-                                }
-                                list += content;
+                            list += content;
+                        }
+                        if (messages.length == 0) {
+                            if (list == "") {
+                                messages.push("None yet");
+                            } else {
+                                messages.push(list);
                             }
-                            if (messages.length == 0) {
-                                if (list == "") {
-                                    messages.push("None yet");
-                                } else {
-                                    messages.push(list);
-                                }
-                            }
-                            for (var i = 0; i < messages.length; i++) {
-                                message.channel.send(messages[i]);
-                            }
-                        } else {
-                            message.channel.send("Sorry, but you don't have the access to list users")
-                            .then(sentMessage => {
-                                setTimeout(
-                                    function () {
-                                        sentMessage.delete();
-                                    },
-                                    3000
-                                );
-                            });
+                        }
+                        for (var i = 0; i < messages.length; i++) {
+                            message.channel.send(messages[i]);
                         }
                         break;
                     default:
