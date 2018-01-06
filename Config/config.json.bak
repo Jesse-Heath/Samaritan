@@ -1,6 +1,7 @@
 {
     "commandPrefix": "{COMMAND_PREFIX}",
     "tbRecords": "{TB_RECORDS_CHANNEL_NAME}",
+    "logMessages": false,
     "guild": "{YOUR_GUILDS_SWGOH_LINK}",
     "twguild": "{YOUR_OPPONENT_GUILDS_SWGOH_LINK}",
     "gears": {

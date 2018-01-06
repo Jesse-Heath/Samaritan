@@ -9,11 +9,33 @@ client.on("ready", () => {
     client.user.setUsername("Samaritan");
 });
 
-client.on("messageUpdate", (message) => {
+client.on("messageUpdate", (message, newMessage) => {
     console.log("updated message");
-    // console.log(message);
+
     if (message.author.bot) return;
+
     var config = require("./Config/config.json");
+
+    if (!config.logMessages) {
+        var username = message.member.guild.members.get(message.author.id).nickname;
+        username = username === null ? message.author.username + "#" + message.author.discriminator : username;
+        var channel = message.channel.name;
+        var logMessage = username + " changed message in `" + channel + "` from: ```" + message.content + "```to: ```" + newMessage.content + "```";
+        for (var [id, user] of message.mentions.users) {
+            var mentionedName = message.member.guild.members.get(id).nickname;
+            mentionedName = mentionedName === null ? user.username + "#" + user.discriminator : mentionedName;
+            logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
+            logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
+        }
+        for (var [id, user] of newMessage.mentions.users) {
+            var mentionedName = newMessage.member.guild.members.get(id).nickname;
+            mentionedName = mentionedName === null ? user.username + "#" + user.discriminator : mentionedName;
+            logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
+            logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
+        }
+        message.guild.channels.find("name", "bot-logs").send(logMessage);
+    }
+
     if (message.channel.name == config.tbRecords) {
         console.log("updated message detected in tb records channel");
         message.channel.send("Recalculating gp totals")
@@ -28,9 +50,26 @@ client.on("messageUpdate", (message) => {
 
 client.on("messageDelete", (message) => {
     console.log("deleted message");
-    // console.log(message);
+
     if (message.author.bot) return;
+
     var config = require("./Config/config.json");
+
+    if (!config.logMessages) {
+        var username = message.member.guild.members.get(message.author.id).nickname;
+        username = username === null ? message.author.username + "#" + message.author.discriminator : username;
+        var channel = message.channel.name;
+        var mentions = message.mentions.users;
+        var logMessage = "A message by " + username + " was deleted in `" + channel + "`: ```" + message.content + "```";
+        for (var [id, user] of mentions) {
+            var mentionedName = message.member.guild.members.get(id).nickname;
+            mentionedName = mentionedName === null ? user.username + "#" + user.discriminator : mentionedName;
+            logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
+            logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
+        }
+        message.guild.channels.find("name", "bot-logs").send(logMessage);
+    }
+
     if (message.channel.name == config.tbRecords) {
         console.log("deleted message detected in tb records channel");
         message.channel.send("Recalculating gp totals")
@@ -50,8 +89,25 @@ client.on("messageDelete", (message) => {
 });
 
 client.on("message", (message) => {
-console.log(message);    if (message.author.bot) return;
+    if (message.author.bot) return;
+
     var config = require("./Config/config.json");
+
+    if (!config.logMessages) {
+        var username = message.member.guild.members.get(message.author.id).nickname;
+        username = username === null ? message.author.username + "#" + message.author.discriminator : username;
+        var channel = message.channel.name;
+        var mentions = message.mentions.users;
+        var logMessage = username + " said in `" + channel + "`: ```" + message.content + "```";
+        for (var [id, user] of mentions) {
+            var mentionedName = message.member.guild.members.get(id).nickname;
+            mentionedName = mentionedName === null ? user.username + "#" + user.discriminator : mentionedName;
+            logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
+            logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
+        }
+        message.guild.channels.find("name", "bot-logs").send(logMessage);
+    }
+
     try {
         if (message.mentions.users.first() != undefined && message.mentions.users.first().username == client.user.username) {
             message.channel.send("Yes?..");
@@ -146,7 +202,7 @@ console.log(message);
                         var starDetailsContent = "\n7" + message.guild.emojis.find("name", "swgohstar") + ": " + star7s.length;
                         starDetailsContent += "\n6" + message.guild.emojis.find("name", "swgohstar") + ": " + star6s.length;
                         starDetailsContent += "\n5" + message.guild.emojis.find("name", "swgohstar") + ": " + star5s.length;
-                        var otherDetailsContent = "";
+                        var otherDetailsContent = "Coming soon...";
                         console.log(JSON.stringify(Object.keys(zetas)));
                         var fields = [
                             {
@@ -705,12 +761,14 @@ console.log(message);
                     2000);
                     var howManyTimesToRun = args.shift();
                     var timeToWait = parseInt(args.shift()) * 1000 * 60;
+                    if (message.mentions.channels.first() !== undefined) {
+                        args.shift();
+                    }
                     remindMe(howManyTimesToRun, timeToWait,
                         function() {
                             if (message.mentions.channels.first() == undefined) {
                                 message.channel.send(args.join(" "));
                             } else {
-                                args.shift();
                                 var id = message.mentions.channels.first().id;
                                 client.channels.get(id).send(args.join(" "));
                             }
