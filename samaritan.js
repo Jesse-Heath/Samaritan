@@ -996,7 +996,7 @@ client.on("message", (message) => {
                         getMods(swgohName, charName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} mods on ${charName}`,
+                                `Here's ${swgohName} mods on ${decodeURI(charName)}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1120,7 +1120,7 @@ client.on("message", (message) => {
                         getGearLevel(swgohName, charName, function (uuid, data) {
                             sentMessage.delete();
                             message.channel.send(
-                                `Here's ${swgohName} gear level for ${charName}`,
+                                `Here's ${swgohName} gear level for ${decodeURI(charName)}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1174,7 +1174,7 @@ client.on("message", (message) => {
                         getGearNeeded(swgohName, charName, function (uuid) {
                             sentMessage.delete();
                             var result = message.channel.send(
-                                `Here's ${swgohName} gear needed for ${charName}`,
+                                `Here's ${swgohName} gear needed for ${decodeURI(charName)}`,
                                 {
                                     files: [
                                         "/tmp/" + uuid + ".png"
@@ -1448,7 +1448,7 @@ function getSwgohName(message) {
         console.log("unknown");
         swgohName = false;
     }
-    return swgohName;
+    return encodeURI(swgohName);
 }
 
 function getSwgohEvents(callback) {
