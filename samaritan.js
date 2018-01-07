@@ -16,7 +16,7 @@ client.on("messageUpdate", (message, newMessage) => {
 
     var config = require("./Config/config.json");
 
-    if (!config.logMessages) {
+    if (config.logMessages === true) {
         var username = message.member.guild.members.get(message.author.id).nickname;
         username = username === null ? message.author.username + "#" + message.author.discriminator : username;
         var channel = message.channel.name;
@@ -55,7 +55,7 @@ client.on("messageDelete", (message) => {
 
     var config = require("./Config/config.json");
 
-    if (!config.logMessages) {
+    if (config.logMessages === true) {
         var username = message.member.guild.members.get(message.author.id).nickname;
         username = username === null ? message.author.username + "#" + message.author.discriminator : username;
         var channel = message.channel.name;
@@ -93,7 +93,7 @@ client.on("message", (message) => {
 
     var config = require("./Config/config.json");
 
-    if (!config.logMessages) {
+    if (config.logMessages === true) {
         var username = message.member.guild.members.get(message.author.id).nickname;
         username = username === null ? message.author.username + "#" + message.author.discriminator : username;
         var channel = message.channel.name;
@@ -871,12 +871,13 @@ client.on("message", (message) => {
                 console.log("help command triggered");
                 var helpCommand = args.shift();
                 switch (message.content.toLowerCase()) {
-                    case "-help admin":
+                    case config.commandPrefix + "help admin":
                         var content = `Hello <@${message.author.id}>. Here's my admin available commands so far:\n`;
                             content += `\n\t\t${config.commandPrefix}**help** **Admin**- This list. Only people with admin or botadmin roles can run these commands.`;
-                            content += `\n\t\t${config.commandPrefix}**addUser** - *(your swgoh name)* - If you mention someone in this message, it will assign the name to them.`;
+                            content += `\n\t\t${config.commandPrefix}**add User** *(your swgoh name)* - If you mention someone in this message, it will assign the name to them.`;
+                            content += `\n\t\t${config.commandPrefix}**add alias** *The character name on swgoh* *The alias to use* - Adds an alias for the bot to use.`;
                             content += `\n\t\t${config.commandPrefix}**removeUser** - Removes your swgoh name from the bot. If you mention someone it will remove their name.`;
-                            content += `\n\t\t${config.commandPrefix}**listUsers** - Lists all users swgoh names that the bot has.`;
+                            content += `\n\t\t${config.commandPrefix}**list Users** - Lists all users swgoh names that the bot has.`;
                             content += `\n\t\t${config.commandPrefix}**purge** - Purges the TB records channel.`;
                         message.channel.send(content);
                         break;
