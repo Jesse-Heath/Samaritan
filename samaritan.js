@@ -1450,6 +1450,7 @@ function removeMentions(args) {
             return args;
         }
     }
+    return args;
 }
 
 function getSwgohName(message) {
