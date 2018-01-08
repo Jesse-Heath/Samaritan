@@ -1449,6 +1449,10 @@ function removeMentions(args) {
             args.splice(i, 1);
             return args;
         }
+        if (/<@[0-9]*>/g.test(args[i])) {
+            args.splice(i, 1);
+            return args;
+        }
     }
     return args;
 }
