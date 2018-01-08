@@ -989,6 +989,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Sure thing <@" + message.author.id + ">. Give me a moment...")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var charName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         charName = aliases[charName] === undefined ? charName : aliases[charName];
@@ -1016,6 +1017,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Compiling data <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var charName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         charName = aliases[charName] === undefined ? charName : aliases[charName];
@@ -1113,6 +1115,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("I'll get right on that <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var charName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         charName = aliases[charName] === undefined ? charName : aliases[charName];
@@ -1167,6 +1170,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("So demanding <@" + message.author.id + ">...")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var charName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         charName = aliases[charName] === undefined ? charName : aliases[charName];
@@ -1194,6 +1198,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Its on the way via carrier pigeon <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var charName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         charName = aliases[charName] === undefined ? charName : aliases[charName];
@@ -1255,6 +1260,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Fine, i will fetch it for you <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var factionName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         factionName = aliases[factionName] === undefined ? factionName : aliases[factionName];
@@ -1336,6 +1342,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Its on it's way <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var shipName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         shipName = aliases[shipName] === undefined ? shipName : aliases[shipName];
@@ -1396,6 +1403,7 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Ok, collecting data <@" + message.author.id + ">")
                     .then(sentMessage => {
+                        args = removeMentions(args);
                         var factionName = args.join(" ").toLowerCase();
                         var aliases = require("./Config/aliases.json");
                         factionName = aliases[factionName] === undefined ? factionName : aliases[factionName];
@@ -1433,6 +1441,15 @@ client.login(auth.token);
 function sendSwgohNameError(message) {
     var config = require("./Config/config.json");
     message.channel.send("I apologise <@" + message.author.id + "> but i don't know who you are, please add your swgoh name by typing the following command\n\`\`\`" + config.commandPrefix + "adduser \"your swgoh name\"\`\`\`");
+}
+
+function removeMentions(args) {
+    for (var i = 0; i < args.length; i++) {
+        if (/<@\![0-9]*>/g.test(args[i])) {
+            args.splice(i, 1);
+            return args;
+        }
+    }
 }
 
 function getSwgohName(message) {
