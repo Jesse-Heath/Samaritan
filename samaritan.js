@@ -523,7 +523,7 @@ client.on("message", (message) => {
                             var doesHeHaveThePower = false;
                             message.member.roles.forEach(
                                 function(role, currentIndex, listObj) {
-                                    if (role.name === "Officers" || role.name === "admin") {
+                                    if (role.name.toLowerCase() == "Officers" || role.name.toLowerCase() == "admin") {
                                         doesHeHaveThePower = true;
                                     }
                                 }
@@ -571,6 +571,7 @@ client.on("message", (message) => {
                                 });
                             }
                         });
+                        message.delete();
                         break;
                     case "alias":
                         console.log("add alias command triggered");
