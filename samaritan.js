@@ -33,7 +33,11 @@ client.on("messageUpdate", (message, newMessage) => {
             logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
             logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
         }
-        message.guild.channels.find("name", "bot-logs").send(logMessage);
+        try {
+            message.guild.channels.find("name", "bot-logs").send(logMessage);
+        } catch (e) {
+            console.log("Couldn't send log message in guild \"" + message.guild.name + "\": " + logMessage);
+        }
     }
 
     if (message.channel.name == config.tbRecords) {
@@ -67,7 +71,11 @@ client.on("messageDelete", (message) => {
             logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
             logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
         }
-        message.guild.channels.find("name", "bot-logs").send(logMessage);
+        try {
+            message.guild.channels.find("name", "bot-logs").send(logMessage);
+        } catch (e) {
+            console.log("Couldn't send log message in guild \"" + message.guild.name + "\": " + logMessage);
+        }
     }
 
     if (message.channel.name == config.tbRecords) {
@@ -105,7 +113,11 @@ client.on("message", (message) => {
             logMessage = logMessage.replace(`<@!${id}>`, `${mentionedName}`);
             logMessage = logMessage.replace(`<@${id}>`, `${mentionedName}`);
         }
-        message.guild.channels.find("name", "bot-logs").send(logMessage);
+        try {
+            message.guild.channels.find("name", "bot-logs").send(logMessage);
+        } catch (e) {
+            console.log("Couldn't send log message in guild \"" + message.guild.name + "\": " + logMessage);
+        }
     }
 
     try {
@@ -983,11 +995,12 @@ client.on("message", (message) => {
                 console.log("link command triggered");
                 var swgohName = getSwgohName(message);
                 console.log(swgohName);
-                if (swgohName) {
+                if (swgohName != "false" && swgohName != undefined) {
                     message.channel.send(`https://swgoh.gg/u/${swgohName}/`);
                 } else {
                     sendSwgohNameError(message);
                 }
+                message.delete();
                 break;
             case "mods":
                 console.log("mods command triggered");
@@ -1874,7 +1887,7 @@ function getZetas(user, callback) {
         } else {
             var error = null;
             if (response.statusCode == 404) {
-                error = "This user does not exist: " + user;
+                error = "This user does not exist on swgoh.gg: " + user;
             } else {
                 error = `Something went wrong! (Error code: ${response.statusCode})`;
             }
