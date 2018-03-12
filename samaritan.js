@@ -151,14 +151,17 @@ client.on("message", (message) => {
             case "tw-info":
                 console.log("tw-info command triggered");
                 var url = config.twguild;
-                var char = args.join(" ");
-                if (char === "") {
+                var charName = args.join(" ").toLowerCase();
+                var aliases = require("./Config/aliases.json");
+                charName = aliases[charName] === undefined ? charName : aliases[charName];
+                charName = charName.replace(" ", "-");
+                if (charName === "") {
                     message.channel.send("Please specify a character");
                     break;
                 }
                 message.channel.send("Calculating the fate of the universe...")
                 .then(sentMessage => {
-                    getGuildInfo(url, char, function(data) {
+                    getGuildInfo(url, charName, function(data) {
                         console.log(JSON.stringify(data));
                         var gear12s = data.filter(function(user) {
                             return user.stats.gear == 12;
@@ -224,7 +227,7 @@ client.on("message", (message) => {
                                   name: client.user.username + " (Spy version)",
                                   icon_url: client.user.avatarURL
                                 },
-                                title: "Info on your opponents " + char,
+                                title: "Info on your opponents " + charName,
                                 fields: fields,
                                 timestamp: new Date(),
                                 footer: {
@@ -912,21 +915,22 @@ client.on("message", (message) => {
                 if (swgohName) {
                     message.channel.send("Fetching your zeta's..")
                     .then(sentMessage => {
-                        getZetas(swgohName, function(data) {
+                        getZetas(swgohName, function(data, error) {
                             console.log("got final data " + JSON.stringify(data));
                             sentMessage.delete();
-                            var fields = [];
+                            message.delete();
+                            if (error == null) {
+                                var fields = [];
 
-                            for (var i = 0; i < data.zetas.length; i++) {
-                                var text = data.zetas[i].zetas.join("\n");
-                                var field = {
-                                    name: data.zetas[i].name,
-                                    value: text,
-                                    inline: true
+                                for (var i = 0; i < data.zetas.length; i++) {
+                                    var text = data.zetas[i].zetas.join("\n");
+                                    var field = {
+                                        name: data.zetas[i].name,
+                                        value: text,
+                                        inline: true
+                                    };
+                                    fields.push(field);
                                 };
-                                fields.push(field);
-                            };
-                            setTimeout( function() {
                                 message.channel.send({
                                     embed: {
                                         author: {
@@ -943,7 +947,9 @@ client.on("message", (message) => {
                                         }
                                     }
                                 });
-                            }, 2000);
+                            } else {
+                                message.channel.send(error);
+                            }
                         });
                     });
                 } else {
@@ -1859,11 +1865,22 @@ function getZetas(user, callback) {
     var request = require('request');
     var cheerio = require('cheerio');
     request(userURL, function (error, response, body) {
-        if (!error) {
+        if (!error && response.statusCode == 200) {
             var $ = cheerio.load(body);
             var guildURL = $("body > div.container.p-t-md > div.content-container > div.content-container-aside > div.panel.panel-default.panel-profile.m-b-sm > div.panel-body > p:nth-child(4) > strong > a").attr("href");
             guildURL = "https://swgoh.gg" + guildURL + "zetas/";
             getZeta(guildURL, callback);
+        } else {
+            var error = null;
+            if (response.statusCode == 404) {
+                error = "This user does not exist: " + user;
+            } else {
+                error = `Something went wrong! (Error code: ${response.statusCode})`;
+            }
+            callback(null, error);
+            console.log("Error occured when fetching zetas for " + user);
+            console.log("response: " + JSON.stringify(response));
+            console.log("error: " + JSON.stringify(error));
         }
     });
 
