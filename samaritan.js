@@ -931,7 +931,6 @@ client.on("message", (message) => {
                         getZetas(swgohName, function(data, error) {
                             console.log("got final data " + JSON.stringify(data));
                             sentMessage.delete();
-                            message.delete();
                             if (error == null) {
                                 var fields = [];
 
@@ -1000,7 +999,6 @@ client.on("message", (message) => {
                 } else {
                     sendSwgohNameError(message);
                 }
-                message.delete();
                 break;
             case "mods":
                 console.log("mods command triggered");
